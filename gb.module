@@ -15,9 +15,33 @@ function gb_menu() {
     $items = array();
     $items['admin/config/user-interface/gb'] = array(
         'title' => 'Geo Block',
+        'type' => MENU_NORMAL_ITEM,
         'description' => 'Creates a block, in which the data are derived based on the geographical location of the visitor.',
         'page callback' => 'gb_settings_page',
         'page arguments' => array('gb_settings_form'),
+        'access arguments' => array('administer site configuration'),
+        'file' => 'gb_settings_form.inc',
+    );
+    $items['admin/config/user-interface/gb/main'] = array(
+        'title' => 'All blocks',
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'page callback' => 'gb_settings_page',
+        'page arguments' => array('gb_settings_form'),
+        'access arguments' => array('administer site configuration'),
+    );
+    $items['admin/config/user-interface/gb/settings'] = array(
+        'title' => 'Module settings',
+        'type' => MENU_LOCAL_TASK,
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('gb_module_settings'),
+        'access arguments' => array('administer site configuration'),
+        'file' => 'gb_settings_form.inc',
+    );
+    $items['admin/config/user-interface/gb/edit'] = array(
+        'title' => 'Edit geo block',
+        'type' => MENU_CALLBACK,
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('gb_edit_block'),
         'access arguments' => array('administer site configuration'),
         'file' => 'gb_settings_form.inc',
     );
@@ -30,9 +54,8 @@ function gb_menu() {
  */
 function gb_block_info() {
     $blocks = array();
-
     $count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
-    for ($i = 0; $i < $count; $i++) {
+    for ($i = 1; $i <= $count; $i++) {
         $blocks['gb_block_n' . $i] = array(
             'info' => t('Geo Block #@num', array('@num' => $i)),
             'cache' => DRUPAL_NO_CACHE,
@@ -47,14 +70,15 @@ function gb_block_info() {
  */
 function gb_block_view($delta = '') {
     $count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
-    for ($i = 0; $i < $count; $i++) {
+    $block = array();
+    for ($i = 1; $i <= $count; $i++) {
         switch ($delta) {
             case 'gb_block_n' . $i:
                 $block['subject'] = t('Geo Block #@num', array('@num' => $i));
                 $block['content'] = gb_block_generate_content($i);
         }
     }
-
+    
     return $block;
 }
 
@@ -81,15 +105,15 @@ function gb_get_user_city($geo_service = '', $ip = '') {
     return $content;
 }
 
-function gb_block_generate_content($block_num = 0) {
+function gb_block_generate_content($block_num = 1) {
     $cities_in_block = variable_get('block_' . $block_num . '_cities', 1);
-    for ($c = 0; $c < $cities_in_block; $c++) {
+    for ($c = 1; $c <= $cities_in_block; $c++) {
         $curr_city = variable_get('block_' . $block_num . '_city_' . $c . '_city_name');
         $user_city = gb_get_user_city();
         if ($curr_city == $user_city) {
             $content = variable_get('block_' . $block_num . '_city_' . $c . '_content');
         } else {
-            $content = variable_get('block_' . $block_num . '_city_0_content');
+            $content = variable_get('block_' . $block_num . '_default_content');
         }
     }
 
