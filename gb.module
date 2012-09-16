@@ -1,0 +1,132 @@
+<?php
+
+/*
+ * @file
+ * Geo Block - Creates a block, in which the data are derived based on the geographical location of the visitor.
+ */
+
+define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
+define('GB_DEFAULT_BLOCKS_COUNT', 1);
+
+/**
+ * Implements hook_menu()
+ */
+function gb_menu() {
+    $items = array();
+    $items['admin/config/user-interface/gb'] = array(
+        'title' => 'Geo Block',
+        'description' => 'Creates a block, in which the data are derived based on the geographical location of the visitor.',
+        'page callback' => 'gb_settings_page',
+        'page arguments' => array('gb_settings_form'),
+        'access arguments' => array('administer site configuration'),
+        'file' => 'gb_settings_form.inc',
+    );
+
+    return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function gb_block_info() {
+    $blocks = array();
+
+    $count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
+    for ($i = 0; $i < $count; $i++) {
+        $blocks['gb_block_n' . $i] = array(
+            'info' => t('Geo Block #@num', array('@num' => $i)),
+            'cache' => DRUPAL_NO_CACHE,
+        );
+    }
+
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function gb_block_view($delta = '') {
+    $count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
+    for ($i = 0; $i < $count; $i++) {
+        switch ($delta) {
+            case 'gb_block_n' . $i:
+                $block['subject'] = t('Geo Block #@num', array('@num' => $i));
+                $block['content'] = gb_block_generate_content($i);
+        }
+    }
+
+    return $block;
+}
+
+/**
+ * @param string $geo_service
+ *    Geo service to be used to determine the user's location.
+ * @param string $ip
+ *    Own IP address that will be determined by the location
+ */
+function gb_get_user_city($geo_service = '', $ip = '') {
+    if (empty($geo_service)) {
+        $geo_service = variable_get('gb_geo_service', GB_DEFAULT_GEOSERVICE);
+    }
+    if (empty($ip)) {
+        $ip = gb_get_user_ip();
+    }
+
+    switch ($geo_service) {
+        case 'ipgeobase':
+            $content = gb_get_user_city_ipgeobase($ip);
+            break;
+    }
+
+    return $content;
+}
+
+function gb_block_generate_content($block_num = 0) {
+    $cities_in_block = variable_get('block_' . $block_num . '_cities', 1);
+    for ($c = 0; $c < $cities_in_block; $c++) {
+        $curr_city = variable_get('block_' . $block_num . '_city_' . $c . '_city_name');
+        $user_city = gb_get_user_city();
+        if ($curr_city == $user_city) {
+            $content = variable_get('block_' . $block_num . '_city_' . $c . '_content');
+        } else {
+            $content = variable_get('block_' . $block_num . '_city_0_content');
+        }
+    }
+
+    return $content;
+}
+
+/**
+ * Get user ip
+ * You can send fake parameters for debugging and verification.
+ * gb_fake_ip - send fake IP
+ * Exmp. http://localhost/?gb_fake_ip=127.0.0.1
+ */
+function gb_get_user_ip() {
+    if (isset($_GET['gb_fake_ip'])) {
+        $ip = $_GET['gb_fake_ip'];
+    } else {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+
+    return $ip;
+}
+
+/**
+ * Get user location with service ipgeobase.ru
+ * @param string $ip
+ *  - IP to locate
+ */
+function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "http://ipgeobase.ru:7020/geo?ip={$ip}");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    $result = curl_exec($ch);
+    curl_close($ch);
+
+    $location = (array) simplexml_load_string($result);
+    $user_city = $location['ip']->city;
+
+    return $user_city;
+}
