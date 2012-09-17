@@ -110,6 +110,7 @@ function gb_get_user_city($geo_service = '', $ip = '') {
  */
 function gb_block_generate_subject($block_num = 1) {
     $cities_in_block = variable_get('block_' . $block_num . '_cities', 1);
+    $subject = '';
     $user_city = gb_get_user_city();
     for ($c = 1; $c <= $cities_in_block; $c++) {
         $curr_city = variable_get('block_' . $block_num . '_city_' . $c . '_city_name');
@@ -133,10 +134,14 @@ function gb_block_generate_content($block_num = 1) {
     for ($c = 1; $c <= $cities_in_block; $c++) {
         $curr_city = variable_get('block_' . $block_num . '_city_' . $c . '_city_name');
         if ($curr_city == $user_city) {
-            $content = variable_get('block_' . $block_num . '_city_' . $c . '_content');
+            $content_plain = variable_get('block_' . $block_num . '_city_' . $c . '_content');
+            $format = variable_get('block_' . $block_num . '_city_' . $c . '_content_format');
+            $content = check_markup($content_plain, $format, $langcode = '', $cache = FALSE);
             break;
         } else {
-            $content = variable_get('block_' . $block_num . '_default_content');
+            $content_plain = variable_get('block_' . $block_num . '_default_content');
+            $format = variable_get('block_' . $block_num . '_default_content_format');
+            $content = check_markup($content_plain, $format, $langcode = '', $cache = FALSE);
         }
     }
 
