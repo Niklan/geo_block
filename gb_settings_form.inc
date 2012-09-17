@@ -98,6 +98,11 @@ function gb_edit_block($form, &$form_state) {
         );
     }
 
+    $form[$bid]['default_subject'] = array(
+        '#type' => 'textfield',
+        '#title' => 'Default block title',
+        '#default_value' => variable_get($bid . '_default_subject'),
+    );
     $form[$bid]['default_content'] = array(
         '#type' => 'text_format',
         '#title' => 'Default content',
@@ -117,6 +122,11 @@ function gb_edit_block($form, &$form_state) {
             '#type' => 'textfield',
             '#title' => 'Name of city',
             '#default_value' => variable_get($bid . '_city_' . $c . '_city_name'),
+        );
+        $form[$bid]['city_' . $c]['subject'] = array(
+            '#type' => 'textfield',
+            '#title' => 'Block title',
+            '#default_value' => variable_get($bid . '_city_' . $c . '_subject'),
         );
         $form[$bid]['city_' . $c]['content'] = array(
             '#type' => 'text_format',
@@ -139,13 +149,14 @@ function gb_edit_block($form, &$form_state) {
  */
 function gb_edit_block_submit(&$form, &$form_state) {
     $bid = arg(5);
-    dsm($form_state);
     $city_count = variable_get($bid . '_cities', 1);
     for ($c = 1; $c <= $city_count; $c++) {
         variable_set($bid . '_city_' . $c . '_city_name', $form_state['values'][$bid]['city_' . $c]['city_name']);
+        variable_set($bid . '_city_' . $c . '_subject', $form_state['values'][$bid]['city_' . $c]['subject']);
         variable_set($bid . '_city_' . $c . '_content', $form_state['values'][$bid]['city_' . $c]['content']['value']);
         variable_set($bid . '_city_' . $c . '_content_format', $form_state['values'][$bid]['city_' . $c]['content']['format']);
     }
+    variable_set($bid . '_default_subject', $form_state['values'][$bid]['default_subject']);
     variable_set($bid . '_default_content', $form_state['values'][$bid]['default_content']['value']);
     variable_set($bid . '_default_content_format', $form_state['values'][$bid]['default_content']['format']);
 }
