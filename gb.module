@@ -102,9 +102,8 @@ function gb_get_user_city($geo_service = '', $ip = '') {
                 $content = gb_get_user_city_ipgeobase($ip);
                 break;
         }
+        setcookie("gb_user_city", $content);
     }
-
-    setcookie("gb_user_city", $content);
 
     return $content;
 }
