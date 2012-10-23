@@ -96,11 +96,15 @@ function gb_get_user_city($geo_service = '', $ip = '') {
         $ip = gb_get_user_ip();
     }
 
-    switch ($geo_service) {
-        case 'ipgeobase':
-            $content = gb_get_user_city_ipgeobase($ip);
-            break;
+    if ($_COOKIE['gb_user_city'] != "") {
+        switch ($geo_service) {
+            case 'ipgeobase':
+                $content = gb_get_user_city_ipgeobase($ip);
+                break;
+        }
     }
+
+    setcookie("gb_user_city", $content);
 
     return $content;
 }
