@@ -17,8 +17,6 @@ function gb_settings_page() {
         $rows[] = $row;
     }
 
-
-
     $build = array();
     $build['gb_table'] = array('#markup' => theme('table', array('header' => $header, 'rows' => $rows)));
 
@@ -31,9 +29,17 @@ function gb_settings_page() {
 function gb_module_settings($form, &$form_state) {
     $form = array();
 
-    $form['gb_geo_service'] = array(
+    $form['main_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Main settings'),
+        '#weight' => 1,
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+    );
+
+    $form['main_settings']['gb_geo_service'] = array(
         '#type' => 'select',
-        '#title' => t('geo-service'),
+        '#title' => t('Geo-service'),
         '#description' => t('What is geo-service will be used to determine the location of the visitor?'),
         '#options' => array(
             'ipgeobase' => 'ipgeobase.ru',
@@ -41,19 +47,57 @@ function gb_module_settings($form, &$form_state) {
         '#default_value' => variable_get('gb_geo_service', GB_DEFAULT_GEOSERVICE),
         '#required' => TRUE,
     );
-    $form['gb_blocks_count'] = array(
+    $form['main_settings']['gb_blocks_count'] = array(
         '#type' => 'textfield',
         '#size' => 2,
         '#maxlength' => 2,
         '#title' => 'Number of blocks',
+        '#description' => t('The number of blocks that will be created.'),
         '#default_value' => variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT),
+    );
+
+    $form['city_select_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Сhange the city'),
+        '#description' => t('This section displays various options nastrivaetsya change the city for the users. necessary for cases when the city was not defined correctly.'),
+        '#weight' => 2,
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+    );
+
+    $form['city_select_settings']['top_toolbar'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Top toolbar'),
+        '#description' => t('Toolbar of the top of the site.'),
+        '#weight' => 2,
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+    );
+
+    $form['city_select_settings']['top_toolbar']['enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('On / Off'),
+        '#default_value' => variable_get('gb_top_toolbar_enabled', 0),
+    );
+    $form['city_select_settings']['top_toolbar']['use_cookie'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Use cookie'),
+        '#description' => t('If checked, the cookie will be set after the close of the selection box.'),
+        '#default_value' => variable_get('gb_top_toolbar_usecookie', 0),
+    );
+    $form['city_select_settings']['top_toolbar']['bg_color'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Background color'),
+        '#description' => t('Background color for wrapper. Default: #FEF0D5'),
+        '#default_value' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5'),
     );
 
     $form['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Save'),
+        '#weight' => 99,
     );
-
+    
     return $form;
 }
 
@@ -72,6 +116,9 @@ function gb_module_settings_validate($form, &$form_state) {
 function gb_module_settings_submit($form, &$form_state) {
     variable_set('gb_blocks_count', $form_state['values']['gb_blocks_count']);
     variable_set('gb_geo_service', $form_state['values']['gb_geo_service']);
+    variable_set('gb_top_toolbar_enabled', $form_state['values']['enabled']);
+    variable_set('gb_top_toolbar_usecookie', $form_state['values']['use_cookie']);
+    variable_set('gb_top_toolbar_bgcolor', $form_state['values']['bg_color']);
 }
 
 /**
