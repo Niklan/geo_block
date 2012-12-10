@@ -215,9 +215,6 @@ function gb_page_build(&$page) {
     drupal_add_js(array('cities' => $cities), 'setting');
     drupal_add_js(array('user_city' => $user_city), 'setting');
     drupal_add_js(array('text' => $text), 'setting');
-    drupal_add_js(array('gb_top_toolbar_enabled' => variable_get('gb_top_toolbar_enabled', 0)), 'setting');
-    drupal_add_js(array('gb_top_toolbar_usecookie' => variable_get('gb_top_toolbar_usecookie', 0)), 'setting');
-    drupal_add_js(array('gb_top_toolbar_bgcolor' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5')), 'setting');
     drupal_add_js(drupal_get_path('module', 'gb') . '/gb_city_select.js');
 }
 
