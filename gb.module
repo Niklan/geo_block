@@ -220,8 +220,3 @@ function gb_page_build(&$page) {
     drupal_add_js(array('gb_top_toolbar_bgcolor' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5')), 'setting');
     drupal_add_js(drupal_get_path('module', 'gb') . '/gb_city_select.js');
 }
-
-/**
- * Исправлены ошибки с кодировкой UTF-8
- * Возможность менять город
- */
