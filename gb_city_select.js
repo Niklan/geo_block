@@ -6,7 +6,6 @@
  * 
  */
 (function ($, Drupal, window, document, undefined) {
-
     $(document).ready(function() {
         function setCookie(c_name,value,exdays) {
             var exdate=new Date();
@@ -14,6 +13,7 @@
             var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
             document.cookie=c_name + "=" + c_value;
         }
+        
         function getCookie ( cookie_name ) {
             var results = document.cookie.match ( '(^|;) ?' + cookie_name + '=([^;]*)(;|$)' );
             if ( results )
@@ -22,21 +22,35 @@
                 return null;
         }
         
+        /**
+         * Set parameters from module
+         * 
+         * cities - List of uniq cities used in module.
+         * user_city - The city which is defined by the first pass, or obtained from cookies.
+         * text - The text that is displayed in front of the city in the top toolbar.
+         */
         var cities = Drupal.settings.cities;
         var user_city = Drupal.settings.user_city;
-        if ($.isPlainObject(user_city)) {
-            user_city = user_city[0]
-        }
         var text = Drupal.settings.text;
-        var topToolbar = Drupal.settings.gb_top_toolbar_enabled;
-        var topToolbarCookie = Drupal.settings.gb_top_toolbar_usecookie;
-        var topToolbarBgColor = Drupal.settings.gb_top_toolbar_bgcolor;
         
-        if (topToolbar == 1) {
-            topToolbarContent = "<div id='gb_city_select_1_close'></div>"
-            topToolbarContent += "<div id='gb_city_select_1_container'>"
-            topToolbarContent += text + " <a href='#' id='gb_city_select_1_link'>" + user_city + "</a>"
-            topToolbarContent += "</div>"
+        /**
+         * This is to ensure that after the selection of the city did not write Object
+         */
+        if ($.isPlainObject(user_city)) {
+            user_city = user_city[0];
+        }
+        
+        /**
+         * Configurations for "TOP TOOLBAR"
+         */
+        if (Drupal.settings.gb_top_toolbar_enabled == 1) {
+            var topToolbarCookie = Drupal.settings.gb_top_toolbar_usecookie;
+            var topToolbarBgColor = Drupal.settings.gb_top_toolbar_bgcolor;
+            
+            topToolbarContent = "<div id='gb_city_select_1_close'></div>";
+            topToolbarContent += "<div id='gb_city_select_1_container'>";
+            topToolbarContent += text + " <a href='#' id='gb_city_select_1_link'>" + user_city + "</a>";
+            topToolbarContent += "</div>";
         
             if (getCookie("gb_city_select_1_disabled") == 0 || getCookie("gb_city_select_1_disabled") == null) {
                 
@@ -91,17 +105,17 @@
                 $('#gb_city_select_1_link').css('border-bottom','1px dotted')
                 .css('text-decoration','none');
         
-                cities_list_window = "<div id='cities_list_window_wrapper'>"
-                cities_list_window += "<div id='cities_list_window_content'><div id='cities_list_window_close'></div>"
-                cities_list_window += "<ul>"
+                cities_list_window = "<div id='cities_list_window_wrapper'>";
+                cities_list_window += "<div id='cities_list_window_content'><div id='cities_list_window_close'></div>";
+                cities_list_window += "<ul>";
                 for (i = 0; i < cities.length; i++) {
                     if (cities[i] == $('#gb_city_select_1_link').text()) {
-                        cities_list_window += "<li>" + cities[i] + "</li>" 
+                        cities_list_window += "<li>" + cities[i] + "</li>";
                     } else {
-                        cities_list_window += "<li><a href='#'>" + cities[i] + "</a></li>" 
+                        cities_list_window += "<li><a href='#'>" + cities[i] + "</a></li>";
                     }
                 }
-                cities_list_window += "</ul></div></div>"
+                cities_list_window += "</ul></div></div>";
         
                 $('#gb_city_select_1_link').click(function(){
                     $(cities_list_window).appendTo('body');
@@ -148,11 +162,60 @@
                     
                     $('#cities_list_window_content > ul a').click(function(){
                         setCookie('gb_user_city', encodeURIComponent(this.innerHTML));
-                        window.location.reload()
+                        window.location.reload();
                     });
                 });
             } 
         }
-    });
-    
+        
+        /**
+         * Configurations for "Placeholder"
+         */
+        var embeded_select_html;
+        embeded_select_html = "<span class='gb_city_change_embeded'>" + user_city + "</span>";
+        
+        $('city-change').append(embeded_select_html);
+        
+        var cities_list_window_popup;
+        cities_list_window_popup += "<ul class='gb_city_change_embeded_popup'>";
+        for (i = 0; i < cities.length; i++) {
+            if (cities[i] == $('.gb_city_change_embeded').text()) {
+                cities_list_window_popup += "<li>" + cities[i] + "</li>";
+            } else {
+                cities_list_window_popup += "<li><a href=''>" + cities[i] + "</a></li>";
+            }
+        }
+        cities_list_window_popup += "</ul>";
+        
+        $('.gb_city_change_embeded').css({
+            'color':'blue',
+            'cursor':'pointer',
+            'text-decoration':'underline'
+        });
+        
+        $('city-change > .gb_city_change_embeded').click(function(){
+            if ($('ul').is('.gb_city_change_embeded_popup')) {
+                $('city-change .gb_city_change_embeded_popup').remove();   
+            } else {
+                $(cities_list_window_popup).appendTo('city-change');
+            
+                $('.gb_city_change_embeded_popup > li > a').click(function(){
+                    setCookie('gb_user_city', encodeURIComponent(this.innerHTML));
+                    window.location.reload();
+                });
+            
+                $('.gb_city_change_embeded_popup').css({
+                    'background':'#FCFCFC',
+                    'width':'200px',
+                    'padding':'15px',
+                    'margin':'0px',
+                    'list-style':'none',
+                    'border':'1px solid #CFCFCF',
+                    'position':'absolute',
+                    'z-index':'999'
+                }); 
+            }
+        });
+        
+    });   
 })(jQuery, Drupal, this, this.document);

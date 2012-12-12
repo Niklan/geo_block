@@ -82,7 +82,7 @@ function gb_module_settings($form, &$form_state) {
     $form['city_select_settings']['top_toolbar']['use_cookie'] = array(
         '#type' => 'checkbox',
         '#title' => t('Use cookie'),
-        '#description' => t('If checked, the cookie will be set after the close of the selection box.'),
+        '#description' => t('If checked, the cookie will be set after the close of the selection box and didnt display again.'),
         '#default_value' => variable_get('gb_top_toolbar_usecookie', 0),
     );
     $form['city_select_settings']['top_toolbar']['bg_color'] = array(
@@ -90,6 +90,17 @@ function gb_module_settings($form, &$form_state) {
         '#title' => t('Background color'),
         '#description' => t('Background color for wrapper. Default: #FEF0D5'),
         '#default_value' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5'),
+    );
+    
+    $form['city_select_settings']['placeholder'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Placeholder'),
+        '#description' => t('Insert the name with the ability to change the city in the right place on the page by inserting the HTML code.<br>
+                            <strong>Code 1:</strong> &lt;gb:city-change&gt;&lt;/gb:city-change&gt; - use it only on template with &lt;!DOCTYPE html&gt;<br>
+                            <strong>Code 2 (old method):</strong> &lt;span id="gb_placeholder"&gt;&lt;/span&gt; or &lt;div id="gb_placeholder"&gt;&lt;/div&gt;'),
+        '#weight' => 3,
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
     );
 
     $form['submit'] = array(
