@@ -189,51 +189,108 @@
         /**
          * Configurations for "Placeholder"
          */
-        var embeded_select_html;
-        embeded_select_html = "<span class='gb_city_change_embeded'>" + user_city + "</span>";
+        if (Drupal.settings.gb_placeholder_enabled == 1) {
+            // Prepare all elements
+            placeholder_html_select = "<a name='city_select' id='gb_city_change_link'>" + user_city + "</a>";
 
-        $('city-change').append(embeded_select_html);
-
-        var cities_list_window_popup;
-        cities_list_window_popup += "<ul class='gb_city_change_embeded_popup'>";
-        for (i = 0; i < cities.length; i++) {
-            if (cities[i] == $('.gb_city_change_embeded').text()) {
-                cities_list_window_popup += "<li>" + cities[i] + "</li>";
+            // If true, then used new method on page
+            if ($('body *').is('city-change')) {
+                placeholder = 'city-change';
             } else {
-                cities_list_window_popup += "<li><a href=''>" + cities[i] + "</a></li>";
+                placeholder = '#gb_placeholder';
             }
+
+            // Append element to placeholder
+            $(placeholder).append(placeholder_html_select);
+
+            placeholder_html_popup = "<ul class='gb_city_change_embeded_popup'>";
+            for (i = 0; i < cities.length; i++) {
+                if (cities[i] == $('#gb_city_change_link').text()) {
+                    placeholder_html_popup += "<li>" + cities[i] + "</li>";
+                } else {
+                    console.log($('#gb_city_change_link').text());
+                    placeholder_html_popup += "<li><a name='" + cities[i] + "'>" + cities[i] + "</a></li>";
+                }
+            }
+            placeholder_html_popup += "</ul>";
+
+            // Click on city name
+            $(placeholder + ' > a').click(function(){
+                console.log($('body *').is('.gb_city_change_embeded_popup'));
+                if ($('body *').is('.gb_city_change_embeded_popup')) {
+                    $('body * .gb_city_change_embeded_popup').remove();
+                } else {
+                    $(placeholder_html_popup).appendTo(placeholder);
+
+                    $(placeholder + ' ul > li > a').click(function(){
+                        setCookie('gb_user_city', encodeURIComponent(this.innerHTML));
+                        window.location.reload();
+                    });
+
+                    $('.gb_city_change_embeded_popup').css({
+                        'background':'#FCFCFC',
+                        'width':'200px',
+                        'padding':'15px',
+                        'margin':'0px',
+                        'list-style':'none',
+                        'border':'1px solid #CFCFCF',
+                        'position':'absolute',
+                        'z-index':'999'
+                    });
+                }
+            });
+
+            // Styles
+            $(placeholder + ' a').css({
+                'cursor':'pointer'
+            });
         }
-        cities_list_window_popup += "</ul>";
 
-        $('.gb_city_change_embeded').css({
-            'color':'blue',
-            'cursor':'pointer',
-            'text-decoration':'underline'
-        });
 
-        $('city-change > .gb_city_change_embeded').click(function(){
-            if ($('ul').is('.gb_city_change_embeded_popup')) {
-                $('city-change .gb_city_change_embeded_popup').remove();
-            } else {
-                $(cities_list_window_popup).appendTo('city-change');
-
-                $('.gb_city_change_embeded_popup > li > a').click(function(){
-                    setCookie('gb_user_city', encodeURIComponent(this.innerHTML));
-                    window.location.reload();
-                });
-
-                $('.gb_city_change_embeded_popup').css({
-                    'background':'#FCFCFC',
-                    'width':'200px',
-                    'padding':'15px',
-                    'margin':'0px',
-                    'list-style':'none',
-                    'border':'1px solid #CFCFCF',
-                    'position':'absolute',
-                    'z-index':'999'
-                });
-            }
-        });
+    //        var embeded_select_html;
+    //        embeded_select_html = "<a name='1' class='gb_city_change_embeded'>" + user_city + "</a>";
+    //
+    //        $('city-change').append(embeded_select_html);
+    //
+    //        var cities_list_window_popup;
+    //        cities_list_window_popup += "<ul class='gb_city_change_embeded_popup'>";
+    //        for (i = 0; i < cities.length; i++) {
+    //            if (cities[i] == $('.gb_city_change_embeded').text()) {
+    //                cities_list_window_popup += "<li>" + cities[i] + "</li>";
+    //            } else {
+    //                console.log($('.gb_city_change_embeded').text());
+    //                cities_list_window_popup += "<li><a href='#'>" + cities[i] + "</a></li>";
+    //            }
+    //        }
+    //        cities_list_window_popup += "</ul>";
+    //
+    //        $('.gb_city_change_embeded').css({
+    //            'cursor':'pointer'
+    //        });
+    //
+    //        $('city-change > .gb_city_change_embeded').click(function(){
+    //            if ($('ul').is('.gb_city_change_embeded_popup')) {
+    //                $('city-change .gb_city_change_embeded_popup').remove();
+    //            } else {
+    //                $(cities_list_window_popup).appendTo(this);
+    //
+    //                $('.gb_city_change_embeded_popup > li > a').click(function(){
+    //                    setCookie('gb_user_city', encodeURIComponent(this.innerHTML));
+    //                    window.location.reload();
+    //                });
+    //
+    //                $('.gb_city_change_embeded_popup').css({
+    //                    'background':'#FCFCFC',
+    //                    'width':'200px',
+    //                    'padding':'15px',
+    //                    'margin':'0px',
+    //                    'list-style':'none',
+    //                    'border':'1px solid #CFCFCF',
+    //                    'position':'absolute',
+    //                    'z-index':'999'
+    //                });
+    //            }
+    //        });
 
     });
 })(jQuery, Drupal, this, this.document);
