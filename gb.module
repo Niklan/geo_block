@@ -106,7 +106,7 @@ function gb_get_user_city($geo_service = '', $ip = '') {
     } else {
         $content = urldecode($_COOKIE['gb_user_city']);
     }
-    
+
     return $content;
 }
 
@@ -194,7 +194,7 @@ function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
 /**
  * Implements hook_page_build(&$page)
  * @param type $page
- * 
+ *
  * This function prepares a list of cities used in the module that JavaScript could use it.
  */
 function gb_page_build(&$page) {
@@ -203,8 +203,8 @@ function gb_page_build(&$page) {
     for ($b = 1; $b <= $block_count; $b++) {
         $cities_in_block = variable_get('block_' . $b . '_cities', 1);
         for ($c = 1; $c <= $cities_in_block; $c++) {
-            $curr_city = strtolower(variable_get('block_' . $b . '_city_' . $c . '_city_name'));
-            if (!in_array($curr_city, $cities)) {
+            $curr_city = variable_get('block_' . $b . '_city_' . $c . '_city_name');
+            if (!in_array(strtolower($curr_city), $cities)) {
                 $cities[] .= $curr_city;
             }
         }
@@ -218,5 +218,6 @@ function gb_page_build(&$page) {
     drupal_add_js(array('gb_top_toolbar_enabled' => variable_get('gb_top_toolbar_enabled', 0)), 'setting');
     drupal_add_js(array('gb_top_toolbar_usecookie' => variable_get('gb_top_toolbar_usecookie', 0)), 'setting');
     drupal_add_js(array('gb_top_toolbar_bgcolor' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5')), 'setting');
+    drupal_add_js(array('gb_placeholder_enabled' => variable_get('gb_placeholder_enabled', 0)), 'setting');
     drupal_add_js(drupal_get_path('module', 'gb') . '/gb_city_select.js');
 }

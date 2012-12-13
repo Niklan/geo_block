@@ -74,24 +74,24 @@ function gb_module_settings($form, &$form_state) {
         '#collapsed' => FALSE,
     );
 
-    $form['city_select_settings']['top_toolbar']['enabled'] = array(
+    $form['city_select_settings']['top_toolbar']['top_toolbar_enabled'] = array(
         '#type' => 'checkbox',
         '#title' => t('On / Off'),
         '#default_value' => variable_get('gb_top_toolbar_enabled', 0),
     );
-    $form['city_select_settings']['top_toolbar']['use_cookie'] = array(
+    $form['city_select_settings']['top_toolbar']['top_toolbar_use_cookie'] = array(
         '#type' => 'checkbox',
         '#title' => t('Use cookie'),
         '#description' => t('If checked, the cookie will be set after the close of the selection box and didnt display again.'),
         '#default_value' => variable_get('gb_top_toolbar_usecookie', 0),
     );
-    $form['city_select_settings']['top_toolbar']['bg_color'] = array(
+    $form['city_select_settings']['top_toolbar']['top_toolbar_bg_color'] = array(
         '#type' => 'textfield',
         '#title' => t('Background color'),
         '#description' => t('Background color for wrapper. Default: #FEF0D5'),
         '#default_value' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5'),
     );
-    
+
     $form['city_select_settings']['placeholder'] = array(
         '#type' => 'fieldset',
         '#title' => t('Placeholder'),
@@ -103,12 +103,18 @@ function gb_module_settings($form, &$form_state) {
         '#collapsed' => FALSE,
     );
 
+    $form['city_select_settings']['placeholder']['placeholder_enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('On / Off'),
+        '#default_value' => variable_get('gb_placeholder_enabled', 0),
+    );
+
     $form['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Save'),
         '#weight' => 99,
     );
-    
+
     return $form;
 }
 
@@ -119,6 +125,7 @@ function gb_module_settings_validate($form, &$form_state) {
     if ($form_state['values']['gb_blocks_count'] <= 0 || $form_state['values']['gb_blocks_count'] >= 100) {
         form_set_error('', t('The number of blocks must be greater than 1 and less than 100.'));
     }
+    krumo($form_state);
 }
 
 /**
@@ -127,9 +134,10 @@ function gb_module_settings_validate($form, &$form_state) {
 function gb_module_settings_submit($form, &$form_state) {
     variable_set('gb_blocks_count', $form_state['values']['gb_blocks_count']);
     variable_set('gb_geo_service', $form_state['values']['gb_geo_service']);
-    variable_set('gb_top_toolbar_enabled', $form_state['values']['enabled']);
-    variable_set('gb_top_toolbar_usecookie', $form_state['values']['use_cookie']);
-    variable_set('gb_top_toolbar_bgcolor', $form_state['values']['bg_color']);
+    variable_set('gb_top_toolbar_enabled', $form_state['values']['top_toolbar_enabled']);
+    variable_set('gb_top_toolbar_usecookie', $form_state['values']['top_toolbar_use_cookie']);
+    variable_set('gb_top_toolbar_bgcolor', $form_state['values']['top_toolbar_bg_color']);
+    variable_set('gb_placeholder_enabled', $form_state['values']['placeholder_enabled']);
 }
 
 /**
