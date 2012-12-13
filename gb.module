@@ -101,6 +101,9 @@ function gb_get_user_city($geo_service = '', $ip = '') {
             case 'ipgeobase':
                 $content = gb_get_user_city_ipgeobase($ip);
                 break;
+            case 'hostip':
+                $content = gb_get_user_city_hostip($ip);
+                break;
         }
         setcookie("gb_user_city", strtolower($content));
     } else {
@@ -164,6 +167,9 @@ function gb_get_user_ip() {
         $ip = $_GET['gb_fake_ip'];
     } else {
         $ip = $_SERVER['REMOTE_ADDR'];
+        if ($ip = '127.0.0.1') {
+            $ip = '37.112.119.248'; // Пермь - Perm'
+        }
     }
 
     return $ip;
@@ -175,9 +181,6 @@ function gb_get_user_ip() {
  *  - IP to locate
  */
 function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
-    if ($ip = '127.0.0.1') {
-        $ip = '37.112.119.248'; // Пермь - Perm'
-    }
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "http://ipgeobase.ru:7020/geo?ip={$ip}");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -187,6 +190,25 @@ function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
 
     $location = (array) simplexml_load_string($result);
     $user_city = $location['ip']->city;
+
+    return $user_city;
+}
+
+/**
+ * Get user location with service hostip.info
+ * @param string $ip
+ *  - IP to locate
+ */
+function gb_get_user_city_hostip($ip = '127.0.0.1') {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "http://api.hostip.info/get_json.php?ip=12.215.42.19");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    $result = curl_exec($ch);
+    curl_close($ch);
+
+    $location = json_decode($result);
+    $user_city = $location->city;
 
     return $user_city;
 }
