@@ -43,6 +43,7 @@ function gb_module_settings($form, &$form_state) {
         '#description' => t('What is geo-service will be used to determine the location of the visitor?'),
         '#options' => array(
             'ipgeobase' => 'ipgeobase.ru',
+            'hostip' => 'hostip.info',
         ),
         '#default_value' => variable_get('gb_geo_service', GB_DEFAULT_GEOSERVICE),
         '#required' => TRUE,
