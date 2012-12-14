@@ -1,15 +1,15 @@
 <?php
-
-/*
+/**
  * @file
- * Geo Block - Creates a block, in which the data are derived based on the geographical location of the visitor.
+ * Geo Block - Creates a block, in which the data are derived
+ * based on the geographical location of the visitor.
  */
 
 define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
 define('GB_DEFAULT_BLOCKS_COUNT', 1);
 
 /**
- * Implements hook_menu()
+ * Implements hook_menu().
  */
 function gb_menu() {
     $items = array();
@@ -106,7 +106,8 @@ function gb_get_user_city($geo_service = '', $ip = '') {
                 break;
         }
         setcookie("gb_user_city", strtolower($content));
-    } else {
+    }
+    else {
         $content = urldecode($_COOKIE['gb_user_city']);
     }
 
@@ -114,7 +115,7 @@ function gb_get_user_city($geo_service = '', $ip = '') {
 }
 
 /**
- * Generate subject for block
+ * Generate subject for block.
  */
 function gb_block_generate_subject($block_num = 1) {
     $cities_in_block = variable_get('block_' . $block_num . '_cities', 1);
@@ -134,7 +135,7 @@ function gb_block_generate_subject($block_num = 1) {
 }
 
 /**
- * Prepare content to display
+ * Prepare content to display.
  */
 function gb_block_generate_content($block_num = 1) {
     $cities_in_block = variable_get('block_' . $block_num . '_cities', 1);
@@ -146,7 +147,8 @@ function gb_block_generate_content($block_num = 1) {
             $format = variable_get('block_' . $block_num . '_city_' . $c . '_content_format');
             $content = check_markup($content_plain, $format, $langcode = '', $cache = FALSE);
             break;
-        } else {
+        }
+        else {
             $content_plain = variable_get('block_' . $block_num . '_default_content');
             $format = variable_get('block_' . $block_num . '_default_content_format');
             $content = check_markup($content_plain, $format, $langcode = '', $cache = FALSE);
@@ -165,7 +167,8 @@ function gb_block_generate_content($block_num = 1) {
 function gb_get_user_ip() {
     if (isset($_GET['gb_fake_ip'])) {
         $ip = $_GET['gb_fake_ip'];
-    } else {
+    }
+    else {
         $ip = $_SERVER['REMOTE_ADDR'];
         if ($ip = '127.0.0.1') {
             $ip = '37.112.119.248'; // Пермь - Perm'
@@ -214,7 +217,7 @@ function gb_get_user_city_hostip($ip = '127.0.0.1') {
 }
 
 /**
- * Implements hook_page_build(&$page)
+ * Implements hook_page_build().
  * @param type $page
  *
  * This function prepares a list of cities used in the module that JavaScript could use it.

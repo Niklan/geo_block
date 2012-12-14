@@ -1,5 +1,5 @@
 /**
- *
+ * @file
  * This script generates a window to select another city, the user,
  * in case you have correctly identified. Urban data sent from
  * gb.module and list based on the established units and cities for them.
@@ -8,18 +8,19 @@
 (function ($, Drupal, window, document, undefined) {
     $(document).ready(function() {
         function setCookie(c_name,value,exdays) {
-            var exdate=new Date();
+            var exdate = new Date();
             exdate.setDate(exdate.getDate() + exdays);
-            var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-            document.cookie=c_name + "=" + c_value;
+            var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+            document.cookie = c_name + "=" + c_value;
         }
 
-        function getCookie ( cookie_name ) {
+        function getCookie (cookie_name) {
             var results = document.cookie.match ( '(^|;) ?' + cookie_name + '=([^;]*)(;|$)' );
-            if ( results )
-                return ( unescape ( results[2] ) );
-            else
+            if (results) {
+                return (unescape(results[2]));
+            } else {
                 return null;
+            }
         }
 
         /**
@@ -117,7 +118,8 @@
                 for (i = 0; i < cities.length; i++) {
                     if (cities[i] == $('#gb_city_select_1_link').text()) {
                         cities_list_window += "<li>" + cities[i] + "</li>";
-                    } else {
+                    }
+                    else {
                         cities_list_window += "<li><a href='#'>" + cities[i] + "</a></li>";
                     }
                 }
@@ -196,7 +198,8 @@
             // If true, then used new method on page
             if ($('body *').is('city-change')) {
                 placeholder = 'city-change';
-            } else {
+            }
+            else {
                 placeholder = '#gb_placeholder';
             }
 
@@ -207,7 +210,8 @@
             for (i = 0; i < cities.length; i++) {
                 if (cities[i] == $('#gb_city_change_link').text()) {
                     placeholder_html_popup += "<li>" + cities[i] + "</li>";
-                } else {
+                }
+                else {
                     console.log($('#gb_city_change_link').text());
                     placeholder_html_popup += "<li><a name='" + cities[i] + "'>" + cities[i] + "</a></li>";
                 }
@@ -219,7 +223,8 @@
                 console.log($('body *').is('.gb_city_change_embeded_popup'));
                 if ($('body *').is('.gb_city_change_embeded_popup')) {
                     $('body * .gb_city_change_embeded_popup').remove();
-                } else {
+                }
+                else {
                     $(placeholder_html_popup).appendTo(placeholder);
 
                     $(placeholder + ' ul > li > a').click(function(){

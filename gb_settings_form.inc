@@ -1,6 +1,6 @@
 <?php
-
 /**
+ * @file
  * Main page of settings module.
  * Display all blocks in table.
  */
