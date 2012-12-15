@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @file
  * Geo Block - Creates a block, in which the data are derived
  * based on the geographical location of the visitor.
  */
@@ -87,7 +88,7 @@ function gb_block_view($delta = '') {
  * @param string $geo_service
  *   Geo service to be used to determine the user's location.
  * @param string $ip
- *    Own IP address that will be determined by the location.
+ *   Own IP address that will be determined by the location.
  */
 function gb_get_user_city($geo_service = '', $ip = '') {
   if (empty($geo_service)) {

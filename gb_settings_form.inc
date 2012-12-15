@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Module's configuration screen.
+ * @file
+ * Module configuration, as well as the administrative interface.
  */
 
-/**
- * Main page of settings module.
- * Display all blocks in table.
- */
+// Main page of settings module.
 function gb_settings_page() {
   $blocks_count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
 
@@ -29,7 +27,7 @@ function gb_settings_page() {
     '#markup' => theme('table', array(
       'header' => $header,
       'rows' => $rows,
-    ))
+    )),
   );
 
   return $build;
