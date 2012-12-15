@@ -11,7 +11,12 @@ function gb_settings_page() {
 
   $header = array(t('Name'), '');
   $rows = array();
-  $rows[] = array(array('data' => l(t('Settings for geo block module'), 'admin/config/user-interface/gb/settings'), 'colspan' => 2));
+  $rows[] = array(
+    array(
+      'data' => l(t('Settings for geo block module'), 'admin/config/user-interface/gb/settings'),
+      'colspan' => 2
+      )
+    );
   for ($i = 1; $i <= $blocks_count; $i++) {
     $row = array();
     $row[] = "Block #{$i}";
@@ -20,7 +25,12 @@ function gb_settings_page() {
   }
 
   $build = array();
-  $build['gb_table'] = array('#markup' => theme('table', array('header' => $header, 'rows' => $rows)));
+  $build['gb_table'] = array(
+    '#markup' => theme('table', array(
+      'header' => $header,
+      'rows' => $rows
+      ))
+    );
 
   return $build;
 }
