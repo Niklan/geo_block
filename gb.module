@@ -3,7 +3,7 @@
 /**
  * @file
  * This file is responsible for handling all the data, and output.
- * 
+ *
  * Geo Block - Creates a block, in which the data are derived
  * based on the geographical location of the visitor.
  */
