@@ -5,7 +5,9 @@
  * Module configuration, as well as the administrative interface.
  */
 
-// Main page of settings module.
+/**
+ * This function generate settings page.
+ */
 function gb_settings_page() {
   $blocks_count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
 
