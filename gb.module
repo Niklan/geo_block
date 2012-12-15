@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * 
  * @file
  * Geo Block - Creates a block, in which the data are derived
  * based on the geographical location of the visitor.
@@ -84,9 +85,10 @@ function gb_block_view($delta = '') {
 
 /**
  * The function receives the user's city.
- * @param string $geo_service
+ * 
+ *   @param string $geo_service
  *    Geo service to be used to determine the user's location.
- * @param string $ip
+ *   @param string $ip
  *    Own IP address that will be determined by the location.
  */
 function gb_get_user_city($geo_service = '', $ip = '') {
@@ -102,6 +104,7 @@ function gb_get_user_city($geo_service = '', $ip = '') {
       case 'ipgeobase':
         $content = gb_get_user_city_ipgeobase($ip);
         break;
+      
       case 'hostip':
         $content = gb_get_user_city_hostip($ip);
         break;
@@ -169,9 +172,10 @@ function gb_get_user_ip() {
 }
 
 /**
- * Get user location with service ipgeobase.ru
- * @param string $ip
- *  - IP to locate
+ * Get user location with service http://ipgeobase.ru/.
+ * 
+ *   @param string $ip
+ *    - IP to locate
  */
 function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
   $ch = curl_init();
@@ -188,9 +192,10 @@ function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
 }
 
 /**
- * Get user location with service hostip.info
- * @param string $ip
- *  - IP to locate
+ * Get user location with service http://hostip.info/.
+ * 
+ *   @param string $ip
+ *    - IP to locate
  */
 function gb_get_user_city_hostip($ip = '127.0.0.1') {
   $ch = curl_init();
@@ -208,9 +213,6 @@ function gb_get_user_city_hostip($ip = '127.0.0.1') {
 
 /**
  * Implements hook_page_build().
- * @param type $page
- *
- * This function prepares a list of cities used in the module that JavaScript could use it.
  */
 function gb_page_build(&$page) {
   $block_count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
