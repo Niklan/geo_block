@@ -1,7 +1,4 @@
 Current update (pre-release)
 -----------------------
 - Added CHANGELOG.txt
-- Code changes according to the standards of Drupal.
-- Function to get ip address of the user is given in accordance with the 
-  requirements of Drupal. Function ip_address().
-- Some hot fixes.
+- Code rewritten and module integrated into the block system Drupal.

@@ -1,86 +1,99 @@
 <?php
-
 /**
  * @file
- * This file is responsible for handling all the data, and output.
- *
- * Geo Block - Creates a block, in which the data are derived
- * based on the geographical location of the visitor.
+ * Main module file.
  */
 
 define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
-define('GB_DEFAULT_BLOCKS_COUNT', 1);
 
 /**
  * Implements hook_menu().
  */
 function gb_menu() {
-  $items = array();
-  $items['admin/config/user-interface/gb'] = array(
-    'title' => 'Geo Block',
-    'type' => MENU_NORMAL_ITEM,
-    'description' => 'Creates a block, in which the data are derived based on the geographical location of the visitor.',
-    'page callback' => 'gb_settings_page',
-    'page arguments' => array('gb_settings_form'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'gb_settings_form.inc',
-  );
-  $items['admin/config/user-interface/gb/main'] = array(
-    'title' => 'All blocks',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'page callback' => 'gb_settings_page',
-    'page arguments' => array('gb_settings_form'),
-    'access arguments' => array('administer site configuration'),
-  );
-  $items['admin/config/user-interface/gb/settings'] = array(
-    'title' => 'Module settings',
-    'type' => MENU_LOCAL_TASK,
+  $items['admin/structure/block/geoblock_add'] = array(
+    'title' => 'Add geo block',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('gb_module_settings'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'gb_settings_form.inc',
+    'page arguments' => array('gb_add_block_form'),
+    'access arguments' => array('administer blocks'),
+    'file' => 'gb.block_forms.inc',
+    'type' => MENU_LOCAL_ACTION,
   );
-  $items['admin/config/user-interface/gb/edit'] = array(
-    'title' => 'Edit geo block',
+  $items['admin/structure/block/gb_configure'] = array(
+    'title' => 'Geo block settings',
+    'description' => 'Configure Geo block settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gb_module_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'gb.admin.inc',
+  );
+  $items['admin/structure/block/manage/gb/%/delete'] = array(
+    'title' => 'Delete block',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gb_delete_block', 5),
+    'access arguments' => array('administer blocks'),
     'type' => MENU_CALLBACK,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('gb_edit_block'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'gb_settings_form.inc',
+    'file' => 'gb.block_forms.inc',
   );
-
+  $items['admin/structure/block/manage/gb/%/configure'] = array(
+    'title' => 'Configure block',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gb_edit_block_form', 5),
+    'access arguments' => array('administer blocks'),
+    'type' => MENU_CALLBACK,
+    'file' => 'gb.block_forms.inc',
+  );
   return $items;
 }
 
 /**
  * Implements hook_block_info().
+ *
+ * Display all added geo blocks from database in /admin/structure/block.
  */
 function gb_block_info() {
   $blocks = array();
-  $count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
-  for ($i = 1; $i <= $count; $i++) {
-    $blocks['gb_block_n' . $i] = array(
-      'info' => t('Geo Block #@num', array('@num' => $i)),
-      'cache' => DRUPAL_NO_CACHE,
-    );
-  }
 
+  $result = db_query('SELECT bid, info FROM {geoblock} ORDER BY info');
+  foreach ($result as $block) {
+    $blocks[$block->bid]['info'] = "Geo Block: " . $block->info;
+    $blocks[$block->bid]['cache'] = DRUPAL_NO_CACHE;
+  }
   return $blocks;
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Add 'Delete' link to block administration page.
+ */
+function gb_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'block_admin_display_form') {
+    foreach ($form['blocks'] as $key => $element) {
+      if ($element['module']['#value'] == 'gb') {
+        $form['blocks'][$key]['delete'] = array(
+          '#type' => 'link',
+          '#title' => t('delete'),
+          '#href' => 'admin/structure/block/manage/gb/' . $element['delta']['#value'] . '/delete',
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Returns information from database about geo block.
+ */
+function gb_block_get($bid) {
+  return db_query("SELECT * FROM {geoblock} WHERE bid = :bid", array(':bid' => $bid))->fetchAssoc();
 }
 
 /**
  * Implements hook_block_view().
  */
 function gb_block_view($delta = '') {
-  $count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
-  $block = array();
-  for ($i = 1; $i <= $count; $i++) {
-    switch ($delta) {
-      case 'gb_block_n' . $i:
-        $block['subject'] = gb_block_generate_subject($i);
-        $block['content'] = gb_block_generate_content($i);
-    }
-  }
+  $data = gb_block_generate_data($delta);
+  $block['subject'] = $data['subject'];
+  $block['content'] = $data['content'];
 
   return $block;
 }
@@ -98,9 +111,8 @@ function gb_get_user_city($geo_service = '', $ip = '') {
     $geo_service = variable_get('gb_geo_service', GB_DEFAULT_GEOSERVICE);
   }
   if (empty($ip)) {
-    $ip = gb_get_user_ip();
+    $ip = ip_address();
   }
-
   if (!isset($_COOKIE['gb_user_city'])) {
     switch ($geo_service) {
       case 'ipgeobase':
@@ -121,56 +133,39 @@ function gb_get_user_city($geo_service = '', $ip = '') {
 }
 
 /**
- * Generate subject for block.
+ * Generate subject and content for block.
  */
-function gb_block_generate_subject($block_num = 1) {
-  $cities_in_block = variable_get('block_' . $block_num . '_cities', 1);
-  $subject = '';
+function gb_block_generate_data($delta = 1) {
+  $block = gb_block_get($delta);
+  $cities_data = unserialize($block['data']);
+  if (count($cities_data) == 2) {
+    $cities_in_block = 1;
+  }
+  else {
+    $cities_in_block = count($cities_data) - 2;
+  }
+  $subject = NULL;
+  $content = NULL;
+  $result = array();
   $user_city = strtolower(gb_get_user_city());
-  for ($c = 1; $c <= $cities_in_block; $c++) {
-    $curr_city = strtolower(variable_get('block_' . $block_num . '_city_' . $c . '_city_name'));
-    if ($curr_city == $user_city) {
-      $subject = variable_get('block_' . $block_num . '_city_' . $c . '_subject');
-      if ($subject == '' || $subject == '<none>') {
-        $subject = variable_get('block_' . $block_num . '_default_subject');
-      }
+  for ($i = 1; $i <= $cities_in_block; $i++) {
+    if ($cities_data[$i]['cities'] == $user_city) {
+      $subject = !empty($cities_data[$i]['block_title']) ? $cities_data[$i]['block_title'] : $block['default_title'];
+      $content_data = !empty($cities_data[$i]['block_content']['value']) ? $cities_data[$i]['block_content']['value'] : $block['default_body'];
+      $content_format = !empty($cities_data[$i]['block_content']['format']) ? $cities_data[$i]['block_content']['format'] : $block['default_format'];
+      $content = check_markup($content_data, $content_format, $langcode = '', $cache = FALSE);
     }
   }
-
-  return $subject;
-}
-
-/**
- * Prepare content to display.
- */
-function gb_block_generate_content($block_num = 1) {
-  $cities_in_block = variable_get('block_' . $block_num . '_cities', 1);
-  $user_city = strtolower(gb_get_user_city());
-  for ($c = 1; $c <= $cities_in_block; $c++) {
-    $curr_city = strtolower(variable_get('block_' . $block_num . '_city_' . $c . '_city_name'));
-    if ($curr_city == $user_city) {
-      $content_plain = variable_get('block_' . $block_num . '_city_' . $c . '_content');
-      $format = variable_get('block_' . $block_num . '_city_' . $c . '_content_format');
-      $content = check_markup($content_plain, $format, $langcode = '', $cache = FALSE);
-      break;
-    }
-    else {
-      $content_plain = variable_get('block_' . $block_num . '_default_content');
-      $format = variable_get('block_' . $block_num . '_default_content_format');
-      $content = check_markup($content_plain, $format, $langcode = '', $cache = FALSE);
-    }
+  if ((empty($subject)) and (empty($content))) {
+    $subject = !empty($block['default_title']) ? $block['default_title'] : NULL;
+    $content_data = !empty($block['default_body']) ? $block['default_body'] : NULL;
+    $content_format = !empty($block['default_format']) ? $block['default_format'] : NULL;
+    $content = check_markup($content_data, $content_format, $langcode = '', $cache = FALSE);
   }
+  $result['subject'] = $subject;
+  $result['content'] = $content;
 
-  return $content;
-}
-
-/**
- * Get user ip.
- */
-function gb_get_user_ip() {
-  $ip = ip_address();
-
-  return $ip;
+  return $result;
 }
 
 /**
@@ -201,7 +196,7 @@ function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
  */
 function gb_get_user_city_hostip($ip = '127.0.0.1') {
   $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, "http://api.hostip.info/get_json.php?ip=12.215.42.19");
+  curl_setopt($ch, CURLOPT_URL, "http://api.hostip.info/get_json.php?ip={$ip}");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HEADER, 0);
   $result = curl_exec($ch);
@@ -217,12 +212,24 @@ function gb_get_user_city_hostip($ip = '127.0.0.1') {
  * Implements hook_page_build().
  */
 function gb_page_build(&$page) {
-  $block_count = variable_get('gb_blocks_count', GB_DEFAULT_BLOCKS_COUNT);
+  $blocks_data = db_select('geoblock', 'g')
+      ->fields('g')
+      ->execute();
+  foreach ($blocks_data as $block) {
+    $blocks[] = $block;
+  }
   $cities = array();
-  for ($b = 1; $b <= $block_count; $b++) {
-    $cities_in_block = variable_get('block_' . $b . '_cities', 1);
+  for ($b = 0; $b < count($blocks); $b++) {
+    $block = gb_block_get($blocks[$b]->bid);
+    $cities_data = unserialize($blocks[$b]->data);
+    if (count($cities_data) == 2) {
+      $cities_in_block = 1;
+    }
+    else {
+      $cities_in_block = count($cities_data) - 2;
+    }
     for ($c = 1; $c <= $cities_in_block; $c++) {
-      $curr_city = variable_get('block_' . $b . '_city_' . $c . '_city_name');
+      $curr_city = $cities_data[$c]['cities'];
       if (!in_array(strtolower($curr_city), $cities)) {
         $cities[] .= $curr_city;
       }
