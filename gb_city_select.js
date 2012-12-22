@@ -24,26 +24,26 @@
     }
 
     /**
-		* Set parameters from module
-		*
-		* cities - List of uniq cities used in module.
-		* user_city - The city which is defined by the first pass, or obtained from cookies.
-		* text - The text that is displayed in front of the city in the top toolbar.
-		*/
+     * Set parameters from module
+     *
+     * cities - List of uniq cities used in module.
+     * user_city - The city which is defined by the first pass, or obtained from cookies.
+     * text - The text that is displayed in front of the city in the top toolbar.
+     */
     var cities = Drupal.settings.cities;
     var user_city = Drupal.settings.user_city;
     var text = Drupal.settings.text;
 
     /**
-		* This is to ensure that after the selection of the city did not write Object.
-		*/
+     * This is to ensure that after the selection of the city did not write Object.
+     */
     if ($.isPlainObject(user_city)) {
       user_city = user_city[0];
     }
 
     /**
-		* Configurations for "TOP TOOLBAR"
-		*/
+     * Configurations for "TOP TOOLBAR"
+     */
     if (Drupal.settings.gb_top_toolbar_enabled == 1) {
       var topToolbarCookie = Drupal.settings.gb_top_toolbar_usecookie;
       var topToolbarBgColor = Drupal.settings.gb_top_toolbar_bgcolor;
@@ -142,7 +142,7 @@
             'z-index':'40',
             'position':'fixed',
             'margin':'0 auto',
-            'top':'50%',
+            'top':'30%',
             'left':'40%',
             'width':'300px',
             'background':'#fef0d5',
@@ -190,8 +190,8 @@
     }
 
     /**
-		* Configurations for "Placeholder".
-		*/
+     * Configurations for "Placeholder".
+     */
     if (Drupal.settings.gb_placeholder_enabled == 1) {
       // Prepare all elements
       placeholder_html_select = "<a name='city_select' id='gb_city_change_link'>" + user_city + "</a>";

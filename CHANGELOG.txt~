@@ -1,6 +1,0 @@
-This update
------------------------
-- Added CHANGELOG.txt
-- Code changes according to the standards of Drupal.
-- Function to get ip address of the user is given in accordance with the requirements of Drupal. Function ip_address().
-
