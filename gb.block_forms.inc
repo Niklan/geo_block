@@ -79,7 +79,7 @@ function gb_add_block_form($form, &$form_state) {
   }
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Add block'),
     '#weight' => 99,
   );
 
@@ -265,7 +265,7 @@ function gb_edit_block_form($form, &$form_state, $delta) {
   }
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Save changes'),
     '#weight' => 99,
   );
 
