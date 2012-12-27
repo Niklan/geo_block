@@ -18,30 +18,11 @@ function gb_schema() {
         'not null' => TRUE,
         'description' => "Primary Key: Unique block ID.",
       ),
-      'info' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-        'description' => 'Block info.',
-      ),
-      'default_title' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-        'description' => 'Default block title.',
-      ),
-      'default_body' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'description' => 'Default block content.',
-        'translatable' => TRUE,
-      ),
-      'default_format' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-        'description' => 'Default format of the block content.',
+      'delta' => array(
+        'type' => 'int',
+        'length' => 11,
+        'not null' => TRUE,
+        'description' => 'Key: Unique block ID (delta) from block table.',
       ),
       'data' => array(
         'type' => 'text',
@@ -62,7 +43,6 @@ function gb_schema() {
  * Delete table with geo block data.
  */
 function gb_uninstall() {
-  db_query('DROP TABLE {geoblock}');
   variable_del('gb_geo_service');
   variable_del('gb_top_toolbar_enabled');
   variable_del('gb_top_toolbar_usecookie');

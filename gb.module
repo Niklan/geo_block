@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Main module file.
@@ -10,14 +11,6 @@ define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
  * Implements hook_menu().
  */
 function gb_menu() {
-  $items['admin/structure/block/geoblock_add'] = array(
-    'title' => 'Add geo block',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('gb_add_block_form'),
-    'access arguments' => array('administer blocks'),
-    'file' => 'gb.block_forms.inc',
-    'type' => MENU_LOCAL_ACTION,
-  );
   $items['admin/structure/block/gb_configure'] = array(
     'title' => 'Geo block settings',
     'description' => 'Configure Geo block settings.',
@@ -26,76 +19,280 @@ function gb_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'gb.admin.inc',
   );
-  $items['admin/structure/block/manage/gb/%/delete'] = array(
-    'title' => 'Delete block',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('gb_delete_block', 5),
-    'access arguments' => array('administer blocks'),
-    'type' => MENU_CALLBACK,
-    'file' => 'gb.block_forms.inc',
-  );
-  $items['admin/structure/block/manage/gb/%/configure'] = array(
-    'title' => 'Configure block',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('gb_edit_block_form', 5),
-    'access arguments' => array('administer blocks'),
-    'type' => MENU_CALLBACK,
-    'file' => 'gb.block_forms.inc',
-  );
   return $items;
 }
 
 /**
- * Implements hook_block_info().
+ * Implements hook_form_block_add_block_form_alter().
  *
- * Display all added geo blocks from database in /admin/structure/block.
+ * Add geo settings only to core block's.
  */
-function gb_block_info() {
-  $blocks = array();
+function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['module']['#value'] == "block") {
+    if (empty($form_state['num_cities'])) {
+      $form_state['num_cities'] = 1;
+    }
 
-  $result = db_query('SELECT bid, info FROM {geoblock} ORDER BY info');
-  foreach ($result as $block) {
-    $blocks[$block->bid]['info'] = "Geo Block: " . $block->info;
-    $blocks[$block->bid]['cache'] = DRUPAL_NO_CACHE;
+    $form['visibility']['geoblock'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Geo Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#group' => 'visibility',
+      '#weight' => 25,
+      '#tree' => TRUE,
+    );
+    $form['visibility']['geoblock']['city_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('City settings'),
+      '#description' => t('In this section you can configure the display of different materials for different cities.'),
+      '#prefix' => '<div id="cities-fieldset-wrapper">',
+      '#suffix' => '</div>',
+      '#weight' => 0,
+      '#tree' => TRUE,
+    );
+
+    for ($i = 1; $i <= $form_state['num_cities']; $i++) {
+      $form['visibility']['geoblock']['city_settings'][$i] = array(
+        '#type' => 'fieldset',
+        '#title' => check_plain("City {$i}"),
+      );
+      $form['visibility']['geoblock']['city_settings'][$i]['cities'] = array(
+        '#type' => 'textfield',
+        '#title' => t('City'),
+      );
+      $form['visibility']['geoblock']['city_settings'][$i]['block_title'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Block title'),
+      );
+      $form['visibility']['geoblock']['city_settings'][$i]['block_content'] = array(
+        '#type' => 'text_format',
+        '#title' => t('Block body'),
+      );
+    }
+
+    $form['visibility']['geoblock']['city_settings']['add_name'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add one more'),
+      '#submit' => array('gb_form_block_admin_configure_alter_add_one'),
+      '#ajax' => array(
+        'callback' => 'gb_form_block_admin_configure_alter_callback',
+        'wrapper' => 'cities-fieldset-wrapper',
+      ),
+    );
+    if ($form_state['num_cities'] > 1) {
+      $form['visibility']['geoblock']['city_settings']['remove_name'] = array(
+        '#type' => 'submit',
+        '#value' => t('Remove one'),
+        '#submit' => array('gb_form_block_admin_configure_alter_remove_one'),
+        '#ajax' => array(
+          'callback' => 'gb_form_block_admin_configure_alter_callback',
+          'wrapper' => 'cities-fieldset-wrapper',
+        ),
+      );
+    }
+
+    $form['#submit'][] = 'gb_form_block_admin_configure_alter_submit';
   }
-  return $blocks;
+
+  return $form;
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_block_admin_configure_alter().
  *
- * Add 'Delete' link to block administration page.
+ * Add geo settings only to core block's.
  */
-function gb_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'block_admin_display_form') {
-    foreach ($form['blocks'] as $key => $element) {
-      if ($element['module']['#value'] == 'gb') {
-        $form['blocks'][$key]['delete'] = array(
-          '#type' => 'link',
-          '#title' => t('delete'),
-          '#href' => 'admin/structure/block/manage/gb/' . $element['delta']['#value'] . '/delete',
-        );
+function gb_form_block_admin_configure_alter(&$form, &$form_state) {
+  if ($form['module']['#value'] == "block") {
+    $default_data_query = db_select('geoblock', 'g')
+        ->fields('g')
+        ->condition('g.delta', $form['delta']['#value'])
+        ->execute()
+        ->fetchObject();
+
+    if (!empty($default_data_query->data)) {
+      $default_data = unserialize($default_data_query->data);
+    }
+    if (empty($form_state['num_cities'])) {
+      $form_state['num_cities'] = 1;
+      if (!empty($default_data)) {
+        for ($i = 1; !empty($default_data[$i]); $i++) {
+          $form_state['num_cities'] = $i;
+        }
       }
+    }
+
+    $form['visibility']['geoblock'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Geo Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#group' => 'visibility',
+      '#weight' => 25,
+      '#tree' => TRUE,
+    );
+    $form['visibility']['geoblock']['city_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('City settings'),
+      '#description' => t('In this section you can configure the display of different materials for different cities.'),
+      '#prefix' => '<div id="cities-fieldset-wrapper">',
+      '#suffix' => '</div>',
+      '#weight' => 0,
+      '#tree' => TRUE,
+    );
+
+    for ($i = 1; $i <= $form_state['num_cities']; $i++) {
+      $form['visibility']['geoblock']['city_settings'][$i] = array(
+        '#type' => 'fieldset',
+        '#title' => check_plain("City {$i}"),
+      );
+      $form['visibility']['geoblock']['city_settings'][$i]['cities'] = array(
+        '#type' => 'textfield',
+        '#title' => t('City'),
+        '#default_value' => isset($default_data[$i]['cities']) ? $default_data[$i]['cities'] : '',
+      );
+      $form['visibility']['geoblock']['city_settings'][$i]['block_title'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Block title'),
+        '#default_value' => isset($default_data[$i]['block_title']) ? $default_data[$i]['block_title'] : '',
+      );
+      $form['visibility']['geoblock']['city_settings'][$i]['block_content'] = array(
+        '#type' => 'text_format',
+        '#title' => t('Block body'),
+        '#default_value' => isset($default_data[$i]['block_content']['value']) ? $default_data[$i]['block_content']['value'] : '',
+        '#format' => isset($default_data[$i]['block_content']['format']) ? $default_data[$i]['block_content']['format'] : 'filtered_html',
+      );
+    }
+
+    $form['visibility']['geoblock']['city_settings']['add_name'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add one more'),
+      '#submit' => array('gb_form_block_admin_configure_alter_add_one'),
+      '#ajax' => array(
+        'callback' => 'gb_form_block_admin_configure_alter_callback',
+        'wrapper' => 'cities-fieldset-wrapper',
+      ),
+    );
+    if ($form_state['num_cities'] > 1) {
+      $form['visibility']['geoblock']['city_settings']['remove_name'] = array(
+        '#type' => 'submit',
+        '#value' => t('Remove one'),
+        '#submit' => array('gb_form_block_admin_configure_alter_remove_one'),
+        '#ajax' => array(
+          'callback' => 'gb_form_block_admin_configure_alter_callback',
+          'wrapper' => 'cities-fieldset-wrapper',
+        ),
+      );
+    }
+
+    $form['#submit'][] = 'gb_form_block_admin_configure_alter_submit';
+  }
+
+  return $form;
+}
+
+/**
+ * Selects and returns the fieldset with the data in it. Used by AJAX.
+ */
+function gb_form_block_admin_configure_alter_callback($form, $form_state) {
+  return $form['visibility']['geoblock']['city_settings'];
+}
+
+/**
+ * Handler button "Add one more".
+ */
+function gb_form_block_admin_configure_alter_add_one($form, &$form_state) {
+  $form_state['num_cities']++;
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Handler button "Remove one".
+ */
+function gb_form_block_admin_configure_alter_remove_one($form, &$form_state) {
+  if ($form_state['num_cities'] > 1) {
+    $form_state['num_cities']--;
+  }
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Handler button "Submit".
+ */
+function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
+  $check_data = db_select('geoblock', 'g')
+      ->fields('g')
+      ->condition('g.delta', $form_state['values']['delta'])
+      ->execute()
+      ->fetchObject();
+
+  $data_to_save = $form_state['values']['geoblock']['city_settings'];
+
+  // Unset values of buttons.
+  unset($data_to_save['add_name']);
+  unset($data_to_save['remove_name']);
+
+  if (!empty($form_state['values']['geoblock']['city_settings'][1]['cities'])) {
+    if (empty($check_data->delta)) {
+      $query = db_insert('geoblock')
+          ->fields(array(
+            'delta' => $form_state['values']['delta'],
+            'data' => serialize($data_to_save),
+          ))
+          ->execute();
+    }
+    else {
+      $query = db_update('geoblock')
+          ->fields(array(
+            'data' => serialize($data_to_save),
+          ))
+          ->condition('delta', $form_state['values']['delta'])
+          ->execute();
     }
   }
 }
 
 /**
- * Returns information from database about geo block.
+ * Implements hook_form_block_custom_block_delete_alter().
  */
-function gb_block_get($bid) {
-  return db_query("SELECT * FROM {geoblock} WHERE bid = :bid", array(':bid' => $bid))->fetchAssoc();
+function gb_form_block_custom_block_delete_alter(&$form, &$form_state) {
+  $form['#submit'][] = 'gb_form_block_custom_block_delete_alter_submit';
 }
 
 /**
- * Implements hook_block_view().
+ * Implements hook_form_block_custom_block_delete_alter_submit().
  */
-function gb_block_view($delta = '') {
-  $data = gb_block_generate_data($delta);
-  $block['subject'] = $data['subject'];
-  $block['content'] = $data['content'];
+function gb_form_block_custom_block_delete_alter_submit(&$form, &$form_state) {
+  db_delete('geoblock')
+      ->condition('delta', $form['bid']['#value'])
+      ->execute();
+}
 
-  return $block;
+/**
+ * Returns information from database about geo block.
+ */
+function gb_block_get($delta) {
+  return db_query("SELECT * FROM {geoblock} WHERE delta = :delta", array(':delta' => $delta))->fetchAssoc();
+}
+
+/**
+ * Implements hook_block_view_alter().
+ */
+function gb_block_view_alter(&$data, $block) {
+  if ($block->module == "block") {
+    $geo_block = gb_block_generate_data($block->delta);
+    if (!empty($geo_block)) {
+      $block->title = $geo_block['subject'];
+      $data['content'] = $geo_block['content'];
+
+      return $data;
+      return $block;
+    }
+    else {
+      return $data;
+    }
+  }
 }
 
 /**
@@ -138,32 +335,27 @@ function gb_get_user_city($geo_service = '', $ip = '') {
 function gb_block_generate_data($delta = 1) {
   $block = gb_block_get($delta);
   $cities_data = unserialize($block['data']);
-  if (count($cities_data) == 2) {
-    $cities_in_block = 1;
-  }
-  else {
-    $cities_in_block = count($cities_data) - 2;
-  }
+  $cities_in_block = count($cities_data);
+
   $subject = NULL;
   $content = NULL;
   $result = array();
   $user_city = strtolower(gb_get_user_city());
   for ($i = 1; $i <= $cities_in_block; $i++) {
-    if ($cities_data[$i]['cities'] == $user_city) {
-      $subject = !empty($cities_data[$i]['block_title']) ? $cities_data[$i]['block_title'] : $block['default_title'];
-      $content_data = !empty($cities_data[$i]['block_content']['value']) ? $cities_data[$i]['block_content']['value'] : $block['default_body'];
-      $content_format = !empty($cities_data[$i]['block_content']['format']) ? $cities_data[$i]['block_content']['format'] : $block['default_format'];
+    if (strtolower($cities_data[$i]['cities']) == $user_city) {
+      $subject = !empty($cities_data[$i]['block_title']) ? $cities_data[$i]['block_title'] : NULL;
+      $content_data = !empty($cities_data[$i]['block_content']['value']) ? $cities_data[$i]['block_content']['value'] : NULL;
+      $content_format = !empty($cities_data[$i]['block_content']['format']) ? $cities_data[$i]['block_content']['format'] : NULL;
       $content = check_markup($content_data, $content_format, $langcode = '', $cache = FALSE);
     }
   }
   if ((empty($subject)) and (empty($content))) {
-    $subject = !empty($block['default_title']) ? $block['default_title'] : NULL;
-    $content_data = !empty($block['default_body']) ? $block['default_body'] : NULL;
-    $content_format = !empty($block['default_format']) ? $block['default_format'] : NULL;
-    $content = check_markup($content_data, $content_format, $langcode = '', $cache = FALSE);
+    $result = NULL;
   }
-  $result['subject'] = $subject;
-  $result['content'] = $content;
+  else {
+    $result['subject'] = $subject;
+    $result['content'] = $content;
+  }
 
   return $result;
 }
@@ -218,32 +410,29 @@ function gb_page_build(&$page) {
   foreach ($blocks_data as $block) {
     $blocks[] = $block;
   }
-  $cities = array();
-  for ($b = 0; $b < count($blocks); $b++) {
-    $block = gb_block_get($blocks[$b]->bid);
-    $cities_data = unserialize($blocks[$b]->data);
-    if (count($cities_data) == 2) {
-      $cities_in_block = 1;
-    }
-    else {
-      $cities_in_block = count($cities_data) - 2;
-    }
-    for ($c = 1; $c <= $cities_in_block; $c++) {
-      $curr_city = $cities_data[$c]['cities'];
-      if (!in_array(strtolower($curr_city), $cities)) {
-        $cities[] .= $curr_city;
+  if (!empty($blocks)) {
+    $cities = array();
+    for ($b = 0; $b < count($blocks); $b++) {
+      $cities_data = unserialize($blocks[$b]->data);
+      $cities_in_block = count($cities_data);
+      for ($c = 1; $c <= $cities_in_block; $c++) {
+        $curr_city = $cities_data[$c]['cities'];
+        if (!in_array($curr_city, $cities)) {
+          $cities[] .= $curr_city;
+        }
       }
     }
-  }
-  $user_city = gb_get_user_city();
-  $text = t('Your location');
 
-  drupal_add_js(array('cities' => $cities), 'setting');
-  drupal_add_js(array('user_city' => $user_city), 'setting');
-  drupal_add_js(array('text' => $text), 'setting');
-  drupal_add_js(array('gb_top_toolbar_enabled' => variable_get('gb_top_toolbar_enabled', 0)), 'setting');
-  drupal_add_js(array('gb_top_toolbar_usecookie' => variable_get('gb_top_toolbar_usecookie', 0)), 'setting');
-  drupal_add_js(array('gb_top_toolbar_bgcolor' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5')), 'setting');
-  drupal_add_js(array('gb_placeholder_enabled' => variable_get('gb_placeholder_enabled', 0)), 'setting');
-  drupal_add_js(drupal_get_path('module', 'gb') . '/gb_city_select.js');
+    $user_city = gb_get_user_city();
+    $text = t('Your location');
+
+    drupal_add_js(array('cities' => $cities), 'setting');
+    drupal_add_js(array('user_city' => $user_city), 'setting');
+    drupal_add_js(array('text' => $text), 'setting');
+    drupal_add_js(array('gb_top_toolbar_enabled' => variable_get('gb_top_toolbar_enabled', 0)), 'setting');
+    drupal_add_js(array('gb_top_toolbar_usecookie' => variable_get('gb_top_toolbar_usecookie', 0)), 'setting');
+    drupal_add_js(array('gb_top_toolbar_bgcolor' => variable_get('gb_top_toolbar_bgcolor', '#FEF0D5')), 'setting');
+    drupal_add_js(array('gb_placeholder_enabled' => variable_get('gb_placeholder_enabled', 0)), 'setting');
+    drupal_add_js(drupal_get_path('module', 'gb') . '/gb_city_select.js');
+  }
 }
