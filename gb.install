@@ -36,3 +36,16 @@ function gb_schema() {
 
   return $schema;
 }
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Delete table with geo block data.
+ */
+function gb_uninstall() {
+  variable_del('gb_geo_service');
+  variable_del('top_toolbar_bg_color');
+  variable_del('top_toolbar_enabled');
+  variable_del('top_toolbar_use_cookie');
+  variable_del('placeholder_enabled');
+}
