@@ -1,3 +1,4 @@
 name = Geo Block
 description = Geo location blocks.
+configure = admin/structure/block/gb_configure
 core = 7.x
