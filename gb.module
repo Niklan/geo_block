@@ -46,8 +46,7 @@ function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
       '#type' => 'fieldset',
       '#title' => t('City settings'),
       '#description' => t('In this section you can configure the display of different materials for different cities.'),
-      '#prefix' => '<div id="cities-fieldset-wrapper">',
-      '#suffix' => '</div>',
+      '#attributes' => array('id' => 'cities-fieldset-wrapper'),
       '#weight' => 0,
       '#tree' => TRUE,
     );
@@ -55,7 +54,7 @@ function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
     for ($i = 1; $i <= $form_state['num_cities']; $i++) {
       $form['visibility']['geoblock']['city_settings'][$i] = array(
         '#type' => 'fieldset',
-        '#title' => check_plain("City {$i}"),
+        '#title' => t("City @city_name", array('@city_name' => $i)),
       );
       $form['visibility']['geoblock']['city_settings'][$i]['cities'] = array(
         '#type' => 'textfield',
@@ -105,11 +104,7 @@ function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
  */
 function gb_form_block_admin_configure_alter(&$form, &$form_state) {
   if ($form['module']['#value'] == "block") {
-    $default_data_query = db_select('geoblock', 'g')
-        ->fields('g')
-        ->condition('g.delta', $form['delta']['#value'])
-        ->execute()
-        ->fetchObject();
+    $default_data_query = db_query('SELECT * FROM {geoblock} WHERE bid = :bid', array(':bid' => $form['delta']['#value']))->fetchObject();
 
     if (!empty($default_data_query->data)) {
       $default_data = unserialize($default_data_query->data);
@@ -136,8 +131,7 @@ function gb_form_block_admin_configure_alter(&$form, &$form_state) {
       '#type' => 'fieldset',
       '#title' => t('City settings'),
       '#description' => t('In this section you can configure the display of different materials for different cities.'),
-      '#prefix' => '<div id="cities-fieldset-wrapper">',
-      '#suffix' => '</div>',
+      '#attributes' => array('id' => 'cities-fieldset-wrapper'),
       '#weight' => 0,
       '#tree' => TRUE,
     );
@@ -145,7 +139,7 @@ function gb_form_block_admin_configure_alter(&$form, &$form_state) {
     for ($i = 1; $i <= $form_state['num_cities']; $i++) {
       $form['visibility']['geoblock']['city_settings'][$i] = array(
         '#type' => 'fieldset',
-        '#title' => check_plain("City {$i}"),
+        '#title' => t("City @city_name", array('@city_name' => $i)),
       );
       $form['visibility']['geoblock']['city_settings'][$i]['cities'] = array(
         '#type' => 'textfield',
@@ -221,11 +215,7 @@ function gb_form_block_admin_configure_alter_remove_one($form, &$form_state) {
  * Handler button "Submit".
  */
 function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
-  $check_data = db_select('geoblock', 'g')
-      ->fields('g')
-      ->condition('g.delta', $form_state['values']['delta'])
-      ->execute()
-      ->fetchObject();
+  $check_data = db_query('SELECT * FROM {geoblock} WHERE bid = :bid', array(':bid' => $form_state['values']['delta']))->fetchObject();
 
   $data_to_save = $form_state['values']['geoblock']['city_settings'];
 
@@ -235,20 +225,18 @@ function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
 
   if (!empty($form_state['values']['geoblock']['city_settings'][1]['cities'])) {
     if (empty($check_data->delta)) {
-      $query = db_insert('geoblock')
-          ->fields(array(
-            'delta' => $form_state['values']['delta'],
-            'data' => serialize($data_to_save),
-          ))
-          ->execute();
+      $record = array(
+        'delta' => $form_state['values']['delta'],
+        'data' => serialize($data_to_save),
+      );
+      drupal_write_record('geoblock', $record);
     }
     else {
-      $query = db_update('geoblock')
-          ->fields(array(
-            'data' => serialize($data_to_save),
-          ))
-          ->condition('delta', $form_state['values']['delta'])
-          ->execute();
+      $record = array(
+        'delta' => $form_state['values']['delta'],
+        'data' => serialize($data_to_save),
+      );
+      drupal_write_record('geoblock', $record);
     }
   }
 }
@@ -401,9 +389,8 @@ function gb_get_user_city_hostip($ip = '127.0.0.1') {
  * Implements hook_page_build().
  */
 function gb_page_build(&$page) {
-  $blocks_data = db_select('geoblock', 'g')
-      ->fields('g')
-      ->execute();
+  $blocks_data = db_query('SELECT * FROM {geoblock}');
+
   foreach ($blocks_data as $block) {
     $blocks[] = $block;
   }
