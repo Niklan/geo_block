@@ -8,22 +8,6 @@
 (function ($) {
   Drupal.behaviors.gb = {
     attach: function (context, settings) {
-      function setCookie(c_name,value,exdays) {
-        var exdate = new Date();
-        exdate.setDate(exdate.getDate() + exdays);
-        var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
-        document.cookie = c_name + "=" + c_value;
-      }
-
-      function getCookie (cookie_name) {
-        var results = document.cookie.match ('(^|;) ?' + cookie_name + '=([^;]*)(;|$)');
-        if (results) {
-          return (unescape(results[2]));
-        } else {
-          return null;
-        }
-      }
-
       /**
      * Set parameters from module
      *
@@ -94,7 +78,7 @@
 
           $('#gb_city_select_1_close').click(function () {
             if (topToolbarCookie == 1) {
-              setCookie('gb_city_select_1_disabled', 1);
+              $.cookie("gb_city_select_1_disabled",1);
             }
 
             $('#gb_city_select_1_wrapper').animate({
@@ -182,7 +166,7 @@
             });
 
             $('#cities_list_window_content > ul a').click(function(){
-              setCookie('gb_user_city', encodeURIComponent(this.innerHTML));
+              $.cookie("gb_user_city", encodeURIComponent(this.innerHTML));
               window.location.reload();
             });
           });
@@ -213,7 +197,6 @@
             placeholder_html_popup += "<li>" + cities[i] + "</li>";
           }
           else {
-            console.log($('#gb_city_change_link').text());
             placeholder_html_popup += "<li><a name='" + cities[i] + "'>" + cities[i] + "</a></li>";
           }
         }
@@ -229,7 +212,7 @@
             $(placeholder_html_popup).appendTo(placeholder);
 
             $(placeholder + ' ul > li > a').click(function(){
-              setCookie('gb_user_city', encodeURIComponent(this.innerHTML));
+              $.cookie("gb_user_city", encodeURIComponent(this.innerHTML));
               window.location.reload();
             });
 

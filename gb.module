@@ -4,7 +4,6 @@
  * @file
  * Main module file.
  */
-
 define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
 
 /**
@@ -205,9 +204,7 @@ function gb_form_block_admin_configure_alter_add_one($form, &$form_state) {
  * Handler button "Remove one".
  */
 function gb_form_block_admin_configure_alter_remove_one($form, &$form_state) {
-  if ($form_state['num_cities'] > 1) {
-    $form_state['num_cities']--;
-  }
+  $form_state['num_cities']--;
   $form_state['rebuild'] = TRUE;
 }
 
@@ -352,14 +349,9 @@ function gb_block_generate_data($delta = 1) {
  *   IP to locate.
  */
 function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, "http://ipgeobase.ru:7020/geo?ip={$ip}");
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_HEADER, 0);
-  $result = curl_exec($ch);
-  curl_close($ch);
-
-  $location = (array) simplexml_load_string($result);
+  $request = drupal_http_request("http://ipgeobase.ru:7020/geo?ip={$ip}");
+  
+  $location = (array) simplexml_load_string($request->data);
   $user_city = $location['ip']->city;
 
   return $user_city;
@@ -372,14 +364,9 @@ function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
  *   IP to locate.
  */
 function gb_get_user_city_hostip($ip = '127.0.0.1') {
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, "http://api.hostip.info/get_json.php?ip={$ip}");
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_HEADER, 0);
-  $result = curl_exec($ch);
-  curl_close($ch);
-
-  $location = json_decode($result);
+  $request = drupal_http_request("http://api.hostip.info/get_json.php?ip={$ip}");
+  
+  $location = json_decode($request->data);
   $user_city = $location->city;
 
   return $user_city;
