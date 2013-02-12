@@ -67,12 +67,16 @@ function gb_module_settings_form($form, &$form_state) {
     '#default_value' => variable_get('top_toolbar_bg_color', '#FEF0D5'),
   );
 
+  $description = t("Insert the name with the ability to change the city in the right place on the page by inserting the HTML code.") . "<br />";
+  $description .= "<strong>" . t("Code 1:") . "</strong>";
+  $description .= t("&lt;gb:city-change&gt;&lt;/gb:city-change&gt; - use it only on template with &lt;!DOCTYPE html&gt;") . "<br />";
+  $description .= "<strong>" . t("Code 2 (old method):") . "</strong>";
+  $description .= t("&lt;span id=&quot;gb_placeholder&quot;&gt;&lt;/span&gt; or &lt;div id=&quot;gb_placeholder&quot;&gt;&lt;/div&gt;");
+  
   $form['city_select_settings']['placeholder'] = array(
     '#type' => 'fieldset',
     '#title' => t('Placeholder'),
-    '#description' => t("Insert the name with the ability to change the city in the right place on the page by inserting the HTML code.<br />
-										<strong>Code 1:</strong> &lt;gb:city-change&gt;&lt;/gb:city-change&gt; - use it only on template with &lt;!DOCTYPE html&gt;<br />
-										<strong>Code 2 (old method):</strong> &lt;span id=&quot;gb_placeholder&quot;&gt;&lt;/span&gt; or &lt;div id=&quot;gb_placeholder&quot;&gt;&lt;/div&gt;"),
+    '#description' => $description,
     '#weight' => 3,
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
