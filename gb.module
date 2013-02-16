@@ -10,7 +10,7 @@ define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
  * Implements hook_menu().
  */
 function gb_menu() {
-  $items['admin/structure/block/gb_configure'] = array(
+  $items['admin/structure/gb_configure'] = array(
     'title' => 'Geo block settings',
     'description' => 'Configure Geo block settings.',
     'page callback' => 'drupal_get_form',
@@ -220,7 +220,7 @@ function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
   unset($data_to_save['add_name']);
   unset($data_to_save['remove_name']);
 
-  if (!empty($form_state['values']['geoblock']['city_settings'][1]['cities'])) {
+  if (!empty($check_data)) {
     if (empty($check_data->delta)) {
       $record = array(
         'delta' => $form_state['values']['delta'],
@@ -230,10 +230,11 @@ function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
     }
     else {
       $record = array(
+        'bid' => $check_data->bid,
         'delta' => $form_state['values']['delta'],
         'data' => serialize($data_to_save),
       );
-      drupal_write_record('geoblock', $record);
+      drupal_write_record('geoblock', $record, 'delta');
     }
   }
 }
@@ -350,7 +351,7 @@ function gb_block_generate_data($delta = 1) {
  */
 function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
   $request = drupal_http_request("http://ipgeobase.ru:7020/geo?ip={$ip}");
-  
+
   $location = (array) simplexml_load_string($request->data);
   $user_city = $location['ip']->city;
 
@@ -365,7 +366,7 @@ function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
  */
 function gb_get_user_city_hostip($ip = '127.0.0.1') {
   $request = drupal_http_request("http://api.hostip.info/get_json.php?ip={$ip}");
-  
+
   $location = json_decode($request->data);
   $user_city = $location->city;
 
