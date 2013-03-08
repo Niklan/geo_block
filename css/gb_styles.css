@@ -15,7 +15,7 @@
   position: absolute;
   top: 0px;
   z-index: 10;
-  background: #FEF0D5;
+  background: #fef0d5;
 }
 
 #gb_city_select_1_container {
@@ -64,7 +64,7 @@
   width: 300px;
   background: #fef0d5;
   padding: 20px;
-  border: 4px solid #D3C09B;
+  border: 4px solid #d3c09b;
 }
 
 #cities_list_window_content > ul {
@@ -96,14 +96,14 @@
 
 /**
  * List of cities for placeholder. (pop-up window)
- */
+*/
 .gb_city_change_embeded_popup {
-  background:#FCFCFC;
+  background: #fcfcfc;
   width: 200px;
   padding: 15px;
   margin: 0px;
   list-style: none;
-  border: 1px solid #CFCFCF;
+  border: 1px solid #cfcfcf;
   position: absolute;
   z-index: 999;
 }
