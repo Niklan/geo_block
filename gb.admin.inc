@@ -72,7 +72,7 @@ function gb_module_settings_form($form, &$form_state) {
   $description .= t("&lt;gb:city-change&gt;&lt;/gb:city-change&gt; - use it only on template with &lt;!DOCTYPE html&gt;") . "<br />";
   $description .= "<strong>" . t("Code 2 (old method):") . "</strong>";
   $description .= t("&lt;span id=&quot;gb_placeholder&quot;&gt;&lt;/span&gt; or &lt;div id=&quot;gb_placeholder&quot;&gt;&lt;/div&gt;");
-  
+
   $form['city_select_settings']['placeholder'] = array(
     '#type' => 'fieldset',
     '#title' => t('Placeholder'),
