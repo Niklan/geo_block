@@ -60,19 +60,13 @@ function gb_module_settings_form($form, &$form_state) {
     '#description' => t("If checked, the cookie will be set after the close of the selection box and it won't display again."),
     '#default_value' => variable_get('top_toolbar_use_cookie', 0),
   );
-  $form['city_select_settings']['top_toolbar']['top_toolbar_bg_color'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Background color'),
-    '#description' => t('Background color for wrapper. Default: color_hash', array('color_hash' => '#FEF0D5')),
-    '#default_value' => variable_get('top_toolbar_bg_color', '#FEF0D5'),
-  );
 
   $description = t("Insert the name with the ability to change the city in the right place on the page by inserting the HTML code.") . "<br />";
   $description .= "<strong>" . t("Code 1:") . "</strong>";
   $description .= t("&lt;gb:city-change&gt;&lt;/gb:city-change&gt; - use it only on template with &lt;!DOCTYPE html&gt;") . "<br />";
   $description .= "<strong>" . t("Code 2 (old method):") . "</strong>";
   $description .= t("&lt;span id=&quot;gb_placeholder&quot;&gt;&lt;/span&gt; or &lt;div id=&quot;gb_placeholder&quot;&gt;&lt;/div&gt;");
-  
+
   $form['city_select_settings']['placeholder'] = array(
     '#type' => 'fieldset',
     '#title' => t('Placeholder'),
