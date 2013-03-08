@@ -4,6 +4,7 @@
  * @file
  * Main module file.
  */
+
 define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
 
 /**
@@ -237,6 +238,13 @@ function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
       drupal_write_record('geoblock', $record, 'delta');
     }
   }
+  else {
+    $record = array(
+      'delta' => $form_state['values']['delta'],
+      'data' => serialize($data_to_save),
+    );
+    drupal_write_record('geoblock', $record);
+  }
 }
 
 /**
@@ -286,7 +294,7 @@ function gb_block_view_alter(&$data, $block) {
  * @param string $ip
  *   Own IP address that will be determined by the location.
  */
-function gb_get_user_city($geo_service = '', $ip = '') {
+function gb_get_user_city($geo_service = '', $ip = '46.146.113.162') {
   if (empty($geo_service)) {
     $geo_service = variable_get('gb_geo_service', GB_DEFAULT_GEOSERVICE);
   }
@@ -406,5 +414,7 @@ function gb_page_build(&$page) {
     drupal_add_js(array('gb_top_toolbar_bgcolor' => variable_get('top_toolbar_bg_color', '#FEF0D5')), 'setting');
     drupal_add_js(array('gb_placeholder_enabled' => variable_get('placeholder_enabled', 0)), 'setting');
     drupal_add_js(drupal_get_path('module', 'gb') . '/gb_city_select.js');
+    drupal_add_js('misc/jquery.cookie.js', 'file');
+    drupal_add_css(drupal_get_path('module', 'gb') . '/css/gb_styles.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
   }
 }
