@@ -49,16 +49,16 @@ function gb_module_settings_form($form, &$form_state) {
     '#collapsed' => FALSE,
   );
 
-  $form['city_select_settings']['top_toolbar']['top_toolbar_enabled'] = array(
+  $form['city_select_settings']['top_toolbar']['gb_top_toolbar_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('On / Off'),
-    '#default_value' => variable_get('top_toolbar_enabled', 0),
+    '#default_value' => variable_get('gb_top_toolbar_enabled', 0),
   );
-  $form['city_select_settings']['top_toolbar']['top_toolbar_use_cookie'] = array(
+  $form['city_select_settings']['top_toolbar']['gb_top_toolbar_use_cookie'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use cookie'),
     '#description' => t("If checked, the cookie will be set after the close of the selection box and it won't display again."),
-    '#default_value' => variable_get('top_toolbar_use_cookie', 0),
+    '#default_value' => variable_get('gb_top_toolbar_use_cookie', 0),
   );
 
   $description = t("Insert the name with the ability to change the city in the right place on the page by inserting the HTML code.") . "<br />";
@@ -76,10 +76,10 @@ function gb_module_settings_form($form, &$form_state) {
     '#collapsed' => FALSE,
   );
 
-  $form['city_select_settings']['placeholder']['placeholder_enabled'] = array(
+  $form['city_select_settings']['placeholder']['gb_placeholder_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('On / Off'),
-    '#default_value' => variable_get('placeholder_enabled', 0),
+    '#default_value' => variable_get('gb_placeholder_enabled', 0),
   );
 
   return system_settings_form($form);
