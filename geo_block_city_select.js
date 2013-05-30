@@ -15,9 +15,9 @@
        * user_city - The city which is defined by the first pass, or obtained from cookies.
        * text - The text that is displayed in front of the city in the top toolbar.
        */
-      var cities = Drupal.settings.cities;
-      var user_city = Drupal.settings.user_city;
-      var text = Drupal.settings.text;
+      var cities = Drupal.settings.geo_block_cities;
+      var user_city = Drupal.settings.geo_block_user_city;
+      var text = Drupal.settings.geo_block_text;
 
       /**
        * This is to ensure that after the selection of the city did not write Object.
@@ -29,16 +29,15 @@
       /**
        * Configurations for "TOP TOOLBAR"
        */
-      if (Drupal.settings.gb_top_toolbar_enabled == 1) {
-        console.log(Drupal.settings.gb_top_toolbar_enabled);
-        var topToolbarCookie = Drupal.settings.gb_top_toolbar_usecookie;
+      if (Drupal.settings.geo_block_top_toolbar_enabled == 1) {
+        var topToolbarCookie = Drupal.settings.geo_block_top_toolbar_usecookie;
 
         topToolbarContent = "<div id='gb_city_select_1_close'></div>";
         topToolbarContent += "<div id='gb_city_select_1_container'>";
         topToolbarContent += text + " <a href='#' id='gb_city_select_1_link'>" + user_city + "</a>";
         topToolbarContent += "</div>";
 
-        if ($.cookie("gb_city_select_1_disabled") === 0 || $.cookie("gb_city_select_1_disabled") === null) {
+        if ($.cookie("geo_block_city_select_1_disabled") === 0 || $.cookie("geo_block_city_select_1_disabled") === null) {
           $('<div/>', {
             id: 'gb_city_select_1_wrapper',
             html: topToolbarContent
@@ -48,7 +47,7 @@
 
           $('#gb_city_select_1_close').click(function() {
             if (topToolbarCookie == 1) {
-              $.cookie("gb_city_select_1_disabled", 1);
+              $.cookie("geo_block_city_select_1_disabled", 1);
             }
 
             $('#gb_city_select_1_wrapper').animate({
@@ -83,7 +82,7 @@
             });
 
             $('#cities_list_window_content > ul a').click(function() {
-              $.cookie("gb_user_city", encodeURIComponent(this.innerHTML));
+              $.cookie("geo_block_user_city", encodeURIComponent(this.innerHTML));
               window.location.reload();
             });
           });
@@ -93,7 +92,7 @@
       /**
        * Configurations for "Placeholder".
        */
-      if (Drupal.settings.gb_placeholder_enabled == 1) {
+      if (Drupal.settings.geo_block_placeholder_enabled == 1) {
         // Prepare all elements
         placeholder_html_select = "<a name='city_select' id='gb_city_change_link'>" + user_city + "</a>";
 
@@ -121,7 +120,6 @@
 
         // Click on city name
         $(placeholder + ' > a').click(function() {
-          console.log($('body *').is('.gb_city_change_embeded_popup'));
           if ($('body *').is('.gb_city_change_embeded_popup')) {
             $('body * .gb_city_change_embeded_popup').remove();
           }
@@ -129,7 +127,7 @@
             $(placeholder_html_popup).appendTo(placeholder);
 
             $(placeholder + ' ul > li > a').click(function() {
-              $.cookie("gb_user_city", encodeURIComponent(this.innerHTML));
+              $.cookie("geo_block_user_city", encodeURIComponent(this.innerHTML));
               window.location.reload();
             });
 

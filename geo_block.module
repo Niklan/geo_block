@@ -5,19 +5,19 @@
  * Main module file.
  */
 
-define('GB_DEFAULT_GEOSERVICE', 'ipgeobase');
+define('GEO_BLOCK_DEFAULT_GEOSERVICE', 'ipgeobase');
 
 /**
  * Implements hook_menu().
  */
-function gb_menu() {
-  $items['admin/structure/gb_configure'] = array(
+function geo_block_menu() {
+  $items['admin/structure/geo_block_configure'] = array(
     'title' => 'Geo block settings',
     'description' => 'Configure Geo block settings.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('gb_module_settings_form'),
+    'page arguments' => array('geo_block_module_settings_form'),
     'access arguments' => array('administer site configuration'),
-    'file' => 'gb.admin.inc',
+    'file' => 'geo_block.admin.inc',
   );
   return $items;
 }
@@ -27,7 +27,7 @@ function gb_menu() {
  *
  * Add geo settings only to core block's.
  */
-function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
+function geo_block_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
   if ($form['module']['#value'] == "block") {
     if (empty($form_state['num_cities'])) {
       $form_state['num_cities'] = 1;
@@ -73,9 +73,9 @@ function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
     $form['visibility']['geoblock']['city_settings']['add_name'] = array(
       '#type' => 'submit',
       '#value' => t('Add one more'),
-      '#submit' => array('gb_form_block_admin_configure_alter_add_one'),
+      '#submit' => array('geo_block_form_block_admin_configure_alter_add_one'),
       '#ajax' => array(
-        'callback' => 'gb_form_block_admin_configure_alter_callback',
+        'callback' => 'geo_block_form_block_admin_configure_alter_callback',
         'wrapper' => 'cities-fieldset-wrapper',
       ),
     );
@@ -83,15 +83,15 @@ function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
       $form['visibility']['geoblock']['city_settings']['remove_name'] = array(
         '#type' => 'submit',
         '#value' => t('Remove one'),
-        '#submit' => array('gb_form_block_admin_configure_alter_remove_one'),
+        '#submit' => array('geo_block_form_block_admin_configure_alter_remove_one'),
         '#ajax' => array(
-          'callback' => 'gb_form_block_admin_configure_alter_callback',
+          'callback' => 'geo_block_form_block_admin_configure_alter_callback',
           'wrapper' => 'cities-fieldset-wrapper',
         ),
       );
     }
 
-    $form['#submit'][] = 'gb_form_block_admin_configure_alter_submit';
+    $form['#submit'][] = 'geo_block_form_block_admin_configure_alter_submit';
   }
 
   return $form;
@@ -102,7 +102,7 @@ function gb_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
  *
  * Add geo settings only to core block's.
  */
-function gb_form_block_admin_configure_alter(&$form, &$form_state) {
+function geo_block_form_block_admin_configure_alter(&$form, &$form_state) {
   if ($form['module']['#value'] == "block") {
     $default_data_query = db_query('SELECT * FROM {geoblock} WHERE bid = :bid', array(':bid' => $form['delta']['#value']))->fetchObject();
 
@@ -162,9 +162,9 @@ function gb_form_block_admin_configure_alter(&$form, &$form_state) {
     $form['visibility']['geoblock']['city_settings']['add_name'] = array(
       '#type' => 'submit',
       '#value' => t('Add one more'),
-      '#submit' => array('gb_form_block_admin_configure_alter_add_one'),
+      '#submit' => array('geo_block_form_block_admin_configure_alter_add_one'),
       '#ajax' => array(
-        'callback' => 'gb_form_block_admin_configure_alter_callback',
+        'callback' => 'geo_block_form_block_admin_configure_alter_callback',
         'wrapper' => 'cities-fieldset-wrapper',
       ),
     );
@@ -172,15 +172,15 @@ function gb_form_block_admin_configure_alter(&$form, &$form_state) {
       $form['visibility']['geoblock']['city_settings']['remove_name'] = array(
         '#type' => 'submit',
         '#value' => t('Remove one'),
-        '#submit' => array('gb_form_block_admin_configure_alter_remove_one'),
+        '#submit' => array('geo_block_form_block_admin_configure_alter_remove_one'),
         '#ajax' => array(
-          'callback' => 'gb_form_block_admin_configure_alter_callback',
+          'callback' => 'geo_block_form_block_admin_configure_alter_callback',
           'wrapper' => 'cities-fieldset-wrapper',
         ),
       );
     }
 
-    $form['#submit'][] = 'gb_form_block_admin_configure_alter_submit';
+    $form['#submit'][] = 'geo_block_form_block_admin_configure_alter_submit';
   }
 
   return $form;
@@ -189,14 +189,14 @@ function gb_form_block_admin_configure_alter(&$form, &$form_state) {
 /**
  * Selects and returns the fieldset with the data in it. Used by AJAX.
  */
-function gb_form_block_admin_configure_alter_callback($form, $form_state) {
+function geo_block_form_block_admin_configure_alter_callback($form, $form_state) {
   return $form['visibility']['geoblock']['city_settings'];
 }
 
 /**
  * Handler button "Add one more".
  */
-function gb_form_block_admin_configure_alter_add_one($form, &$form_state) {
+function geo_block_form_block_admin_configure_alter_add_one($form, &$form_state) {
   $form_state['num_cities']++;
   $form_state['rebuild'] = TRUE;
 }
@@ -204,7 +204,7 @@ function gb_form_block_admin_configure_alter_add_one($form, &$form_state) {
 /**
  * Handler button "Remove one".
  */
-function gb_form_block_admin_configure_alter_remove_one($form, &$form_state) {
+function geo_block_form_block_admin_configure_alter_remove_one($form, &$form_state) {
   $form_state['num_cities']--;
   $form_state['rebuild'] = TRUE;
 }
@@ -212,7 +212,7 @@ function gb_form_block_admin_configure_alter_remove_one($form, &$form_state) {
 /**
  * Handler button "Submit".
  */
-function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
+function geo_block_form_block_admin_configure_alter_submit(&$form, &$form_state) {
   $check_data = db_query('SELECT * FROM {geoblock} WHERE bid = :bid', array(':bid' => $form_state['values']['delta']))->fetchObject();
 
   $data_to_save = $form_state['values']['geoblock']['city_settings'];
@@ -250,14 +250,14 @@ function gb_form_block_admin_configure_alter_submit(&$form, &$form_state) {
 /**
  * Implements hook_form_block_custom_block_delete_alter().
  */
-function gb_form_block_custom_block_delete_alter(&$form, &$form_state) {
-  $form['#submit'][] = 'gb_block_custom_block_delete_submit';
+function geo_block_form_block_custom_block_delete_alter(&$form, &$form_state) {
+  $form['#submit'][] = 'geo_block_custom_block_delete_submit';
 }
 
 /**
  * Confirm the deletion of the block. Deletes its data from the database.
  */
-function gb_block_custom_block_delete_submit(&$form, &$form_state) {
+function geo_block_custom_block_delete_submit(&$form, &$form_state) {
   db_delete('geoblock')
       ->condition('delta', $form['bid']['#value'])
       ->execute();
@@ -266,16 +266,16 @@ function gb_block_custom_block_delete_submit(&$form, &$form_state) {
 /**
  * Returns information from database about geo block.
  */
-function gb_block_get($delta) {
+function geo_block_block_get($delta) {
   return db_query("SELECT * FROM {geoblock} WHERE delta = :delta", array(':delta' => $delta))->fetchAssoc();
 }
 
 /**
  * Implements hook_block_view_alter().
  */
-function gb_block_view_alter(&$data, $block) {
+function geo_block_block_view_alter(&$data, $block) {
   if ($block->module == "block") {
-    $geo_block = gb_block_generate_data($block->delta);
+    $geo_block = geo_block_block_generate_data($block->delta);
     if (!empty($geo_block)) {
       $block->title = $geo_block['subject'];
       $data['content'] = $geo_block['content'];
@@ -294,27 +294,27 @@ function gb_block_view_alter(&$data, $block) {
  * @param string $ip
  *   Own IP address that will be determined by the location.
  */
-function gb_get_user_city($geo_service = '', $ip = '46.146.113.162') {
+function geo_block_get_user_city($geo_service = '', $ip = '46.146.113.162') {
   if (empty($geo_service)) {
-    $geo_service = variable_get('gb_geo_service', GB_DEFAULT_GEOSERVICE);
+    $geo_service = variable_get('geo_block_geo_service', GEO_BLOCK_DEFAULT_GEOSERVICE);
   }
   if (empty($ip)) {
     $ip = ip_address();
   }
-  if (!isset($_COOKIE['gb_user_city'])) {
+  if (!isset($_COOKIE['geo_block_user_city'])) {
     switch ($geo_service) {
       case 'ipgeobase':
-        $content = gb_get_user_city_ipgeobase($ip);
+        $content = geo_block_get_user_city_ipgeobase($ip);
         break;
 
       case 'hostip':
-        $content = gb_get_user_city_hostip($ip);
+        $content = geo_block_get_user_city_hostip($ip);
         break;
     }
-    setcookie("gb_user_city", strtolower($content));
+    setcookie("geo_block_user_city", strtolower($content));
   }
   else {
-    $content = urldecode($_COOKIE['gb_user_city']);
+    $content = urldecode($_COOKIE['geo_block_user_city']);
   }
 
   return $content;
@@ -323,15 +323,15 @@ function gb_get_user_city($geo_service = '', $ip = '46.146.113.162') {
 /**
  * Generate subject and content for block.
  */
-function gb_block_generate_data($delta = 1) {
-  $block = gb_block_get($delta);
+function geo_block_block_generate_data($delta = 1) {
+  $block = geo_block_block_get($delta);
   $cities_data = unserialize($block['data']);
   $cities_in_block = count($cities_data);
 
   $subject = NULL;
   $content = NULL;
   $result = array();
-  $user_city = strtolower(gb_get_user_city());
+  $user_city = strtolower(geo_block_get_user_city());
   for ($i = 1; $i <= $cities_in_block; $i++) {
     if (strtolower($cities_data[$i]['cities']) == $user_city) {
       $subject = !empty($cities_data[$i]['block_title']) ? $cities_data[$i]['block_title'] : NULL;
@@ -357,7 +357,7 @@ function gb_block_generate_data($delta = 1) {
  * @param string $ip
  *   IP to locate.
  */
-function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
+function geo_block_get_user_city_ipgeobase($ip = '127.0.0.1') {
   $request = drupal_http_request("http://ipgeobase.ru:7020/geo?ip={$ip}");
 
   $location = (array) simplexml_load_string($request->data);
@@ -372,7 +372,7 @@ function gb_get_user_city_ipgeobase($ip = '127.0.0.1') {
  * @param string $ip
  *   IP to locate.
  */
-function gb_get_user_city_hostip($ip = '127.0.0.1') {
+function geo_block_get_user_city_hostip($ip = '127.0.0.1') {
   $request = drupal_http_request("http://api.hostip.info/get_json.php?ip={$ip}");
 
   $location = json_decode($request->data);
@@ -384,7 +384,7 @@ function gb_get_user_city_hostip($ip = '127.0.0.1') {
 /**
  * Implements hook_page_build().
  */
-function gb_page_build(&$page) {
+function geo_block_page_build(&$page) {
   $blocks_data = db_query('SELECT * FROM {geoblock}');
 
   foreach ($blocks_data as $block) {
@@ -403,17 +403,17 @@ function gb_page_build(&$page) {
       }
     }
 
-    $user_city = gb_get_user_city();
+    $user_city = geo_block_get_user_city();
     $text = t('Your location');
 
-    drupal_add_js(array('cities' => $cities), 'setting');
-    drupal_add_js(array('user_city' => $user_city), 'setting');
-    drupal_add_js(array('text' => $text), 'setting');
-    drupal_add_js(array('gb_top_toolbar_enabled' => variable_get('top_toolbar_enabled', 0)), 'setting');
-    drupal_add_js(array('gb_top_toolbar_usecookie' => variable_get('top_toolbar_use_cookie', 0)), 'setting');
-    drupal_add_js(array('gb_placeholder_enabled' => variable_get('placeholder_enabled', 0)), 'setting');
-    drupal_add_js(drupal_get_path('module', 'gb') . '/gb_city_select.js');
+    drupal_add_js(array('geo_block_cities' => $cities), 'setting');
+    drupal_add_js(array('geo_block_user_city' => $user_city), 'setting');
+    drupal_add_js(array('geo_block_text' => $text), 'setting');
+    drupal_add_js(array('geo_block_top_toolbar_enabled' => variable_get('geo_block_top_toolbar_enabled', 0)), 'setting');
+    drupal_add_js(array('geo_block_top_toolbar_usecookie' => variable_get('geo_block_top_toolbar_use_cookie', 0)), 'setting');
+    drupal_add_js(array('geo_block_placeholder_enabled' => variable_get('geo_block_placeholder_enabled', 0)), 'setting');
+    drupal_add_js(drupal_get_path('module', 'geo_block') . '/geo_block_city_select.js');
     drupal_add_js('misc/jquery.cookie.js', 'file');
-    drupal_add_css(drupal_get_path('module', 'gb') . '/css/gb_styles.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+    drupal_add_css(drupal_get_path('module', 'geo_block') . '/css/geo_block_styles.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
   }
 }
