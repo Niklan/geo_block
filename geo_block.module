@@ -298,7 +298,7 @@ function geo_block_get_user_city($geo_service = '', $ip = '127.0.0.1') {
   if (empty($geo_service)) {
     $geo_service = variable_get('geo_block_geo_service', GEO_BLOCK_DEFAULT_GEOSERVICE);
   }
-  if (empty($ip)) {
+  if ($ip = '127.0.0.1') {
     $ip = ip_address();
   }
   if (!isset($_COOKIE['geo_block_user_city'])) {
