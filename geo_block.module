@@ -294,7 +294,7 @@ function geo_block_block_view_alter(&$data, $block) {
  * @param string $ip
  *   Own IP address that will be determined by the location.
  */
-function geo_block_get_user_city($geo_service = '', $ip = '46.146.113.162') {
+function geo_block_get_user_city($geo_service = '', $ip) {
   if (empty($geo_service)) {
     $geo_service = variable_get('geo_block_geo_service', GEO_BLOCK_DEFAULT_GEOSERVICE);
   }
